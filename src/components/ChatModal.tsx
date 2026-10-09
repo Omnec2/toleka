@@ -3,36 +3,79 @@ import type { FormEvent } from 'react';
 import { Send, X } from 'lucide-react';
 import type { ChatMessage, CollabRequest } from '../types/models';
 import { subscribeChat, sendChatMessage } from '../lib/db';
+import {
+  getDemoMessages,
+  appendDemoMessage,
+  notifyDemoIncomingMessage,
+  subscribeDemoIncomingMessages,
+  setLastReadTime
+} from '../lib/chatNotifications';
 import Avatar from './Avatar';
 
 interface Props {
   request: CollabRequest;
   currentUserId: string;
   currentUserName: string;
+  partnerName?: string;
+  partnerPhoto?: string;
+  partnerProfession?: string;
   onClose: () => void;
+  onAuthorClick?: (userId: string, userName: string) => void;
   isDemo?: boolean;
 }
 
-export default function ChatModal({ request, currentUserId, currentUserName, onClose, isDemo }: Props) {
+export default function ChatModal({
+  request,
+  currentUserId,
+  currentUserName,
+  partnerName,
+  partnerPhoto,
+  onClose,
+  onAuthorClick,
+  isDemo
+}: Props) {
+  const partnerId = currentUserId === request.senderId ? request.receiverId : request.senderId;
+  const resolvedPartnerName = partnerName || (currentUserId === request.senderId ? 'Auteur du projet' : request.senderName);
+  const resolvedPartnerPhoto = partnerPhoto || (currentUserId === request.senderId ? undefined : request.senderPhoto);
+
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    // Message initial automatique basé sur la proposition
-    return [
-      {
-        id: 'init-msg',
-        requestId: request.id,
-        senderId: request.senderId,
-        senderName: request.senderName,
-        text: request.message,
-        createdAt: request.createdAt,
-      }
-    ];
+    const initMsg: ChatMessage = {
+      id: 'init-msg',
+      requestId: request.id,
+      senderId: request.senderId,
+      senderName: request.senderName,
+      text: request.message,
+      createdAt: request.createdAt,
+    };
+    if (isDemo) {
+      return getDemoMessages(request.id, initMsg);
+    }
+    return [initMsg];
   });
+
   const [input, setInput] = useState('');
   const endRef = useRef<HTMLDivElement>(null);
 
+  // Marquer comme lu à l'ouverture et lors de la réception de messages tant que la fenêtre est ouverte
+  useEffect(() => {
+    setLastReadTime(currentUserId, request.id, Date.now());
+  }, [currentUserId, request.id, messages.length]);
+
   // Synchronisation temps réel Firestore si non-démo
   useEffect(() => {
-    if (isDemo) return;
+    if (isDemo) {
+      // Écoute des messages démo émis en local
+      const unsubDemo = subscribeDemoIncomingMessages(({ request: r, message: m }) => {
+        if (r.id === request.id) {
+          setMessages((prev) => {
+            if (prev.some((x) => x.id === m.id)) return prev;
+            return [...prev, m];
+          });
+        }
+      });
+      return () => unsubDemo();
+    }
+
     const unsub = subscribeChat(
       request.id,
       (cloudMsgs) => {
@@ -53,21 +96,44 @@ export default function ChatModal({ request, currentUserId, currentUserName, onC
 
   const handleSend = async (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    const textToSend = input.trim();
+    if (!textToSend) return;
 
     const newMsg: ChatMessage = {
       id: 'msg-' + Date.now(),
       requestId: request.id,
       senderId: currentUserId,
       senderName: currentUserName,
-      text: input.trim(),
+      text: textToSend,
       createdAt: Date.now(),
     };
 
     setMessages((prev) => [...prev, newMsg]);
     setInput('');
 
-    if (!isDemo) {
+    if (isDemo) {
+      appendDemoMessage(request.id, newMsg);
+
+      // Simulation de réponse automatique pour tester les notifications et les échanges
+      setTimeout(() => {
+        const demoResponses = [
+          "Super ! J'ai bien reçu ton message. Travaillons ensemble là-dessus, quand es-tu dispo ?",
+          "Parfait, ravi d'échanger avec toi ! Regarde mon profil si tu veux voir plus de réalisations.",
+          "Génial ! On peut se caler un appel ou continuer d'échanger ici pour finaliser les détails."
+        ];
+        const randomText = demoResponses[Math.floor(Math.random() * demoResponses.length)];
+        const replyMsg: ChatMessage = {
+          id: 'demo-reply-' + Date.now(),
+          requestId: request.id,
+          senderId: partnerId,
+          senderName: resolvedPartnerName,
+          text: randomText,
+          createdAt: Date.now(),
+        };
+        appendDemoMessage(request.id, replyMsg);
+        notifyDemoIncomingMessage(request, replyMsg);
+      }, 2500);
+    } else {
       try {
         await sendChatMessage(request.id, {
           requestId: newMsg.requestId,
@@ -82,8 +148,6 @@ export default function ChatModal({ request, currentUserId, currentUserName, onC
     }
   };
 
-  const partnerName = currentUserId === request.senderId ? 'Auteur du projet' : request.senderName;
-
   return (
     <div className="overlay" onClick={onClose} style={{ zIndex: 110 }}>
       <div 
@@ -93,18 +157,37 @@ export default function ChatModal({ request, currentUserId, currentUserName, onC
       >
         <div className="grabber" />
         
-        {/* En-tête du Chat */}
+        {/* En-tête du Chat avec profil cliquable */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Avatar name={partnerName} size={38} ring="var(--ok)" />
+          <button
+            type="button"
+            onClick={() => onAuthorClick?.(partnerId, resolvedPartnerName)}
+            className="chat-header-user-btn"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: 'none',
+              border: 'none',
+              padding: '2px 4px',
+              cursor: onAuthorClick ? 'pointer' : 'default',
+              textAlign: 'left',
+              color: 'inherit',
+              borderRadius: '12px'
+            }}
+            title={onAuthorClick ? `Voir le profil de ${resolvedPartnerName}` : undefined}
+          >
+            <Avatar name={resolvedPartnerName} src={resolvedPartnerPhoto} size={38} ring="var(--ok)" />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <b style={{ fontSize: '0.95rem' }}>{partnerName}</b>
+                <b style={{ fontSize: '0.95rem', textDecoration: onAuthorClick ? 'underline' : 'none', textDecorationColor: 'var(--brand)' }}>
+                  {resolvedPartnerName}
+                </b>
                 <span className="chip chip-ok" style={{ padding: '2px 6px', fontSize: '0.65rem' }}>Projet validé</span>
               </div>
               <span className="faint" style={{ display: 'block' }}>« {request.flashTitle} »</span>
             </div>
-          </div>
+          </button>
           <button onClick={onClose} className="btn-icon-nav" aria-label="Fermer le chat">
             <X size={18} />
           </button>
@@ -131,11 +214,31 @@ export default function ChatModal({ request, currentUserId, currentUserName, onC
                   gap: '2px'
                 }}
               >
-                {!isMe && (
-                  <span style={{ fontSize: '0.68rem', color: 'var(--text-2)', marginLeft: '4px' }}>
-                    {m.senderName}
-                  </span>
-                )}
+                {!isMe ? (
+                  <button
+                    type="button"
+                    onClick={() => onAuthorClick?.(m.senderId, m.senderName)}
+                    className="chat-bubble-sender-btn"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '0 4px',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: 'var(--brand)',
+                      cursor: onAuthorClick ? 'pointer' : 'default',
+                      textAlign: 'left',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      width: 'fit-content'
+                    }}
+                    title={onAuthorClick ? `Voir le profil de ${m.senderName}` : undefined}
+                  >
+                    <span>{m.senderName}</span>
+                    {onAuthorClick && <span style={{ fontSize: '0.65rem', opacity: 0.8 }}>↗</span>}
+                  </button>
+                ) : null}
                 <div 
                   style={{
                     padding: '10px 14px',

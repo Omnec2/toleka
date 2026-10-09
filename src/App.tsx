@@ -4,7 +4,7 @@ import { Zap, PlusCircle, Inbox, User as UserIcon, LogOut, Sparkles, Target, Lay
 import { InstagramIcon, YoutubeIcon, LinkedinIcon } from './components/SocialIcons';
 import { onAuthStateChanged } from 'firebase/auth';
 import confetti from 'canvas-confetti';
-import type { CollabRequest, FlashAnnouncement, UserProfile } from './types/models';
+import type { CollabRequest, FlashAnnouncement, UserProfile, ChatMessage } from './types/models';
 import { auth, logOut, signInWithGoogle } from './lib/firebase';
 import * as store from './lib/db';
 import { ME, SEED_FLASHS, SEED_REQUESTS, catOf } from './constants';
@@ -19,6 +19,15 @@ import type { FlashDraft } from './components/CreateFlash';
 import Dashboard from './components/Dashboard';
 import ChatModal from './components/ChatModal';
 import UserProfileModal from './components/UserProfileModal';
+import ChatNotificationToast from './components/ChatNotificationToast';
+import {
+  playNotificationSound,
+  sendBrowserNotification,
+  requestNotificationPermission,
+  getLastReadTime,
+  setLastReadTime,
+  subscribeDemoIncomingMessages,
+} from './lib/chatNotifications';
 
 interface SessionUser {
   uid: string;
@@ -66,6 +75,14 @@ export default function App() {
   const [activeChatRequest, setActiveChatRequest] = useState<CollabRequest | null>(null);
   const [viewedProfile, setViewedProfile] = useState<UserProfile | null>(null);
 
+  // Gestion des notifications de chat et messages non lus
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+  const [chatNotification, setChatNotification] = useState<{
+    request: CollabRequest;
+    message: ChatMessage;
+    senderPhoto?: string;
+  } | null>(null);
+
   const toastTimer = useRef<number | undefined>(undefined);
 
   const demo = isDemo(user);
@@ -76,6 +93,26 @@ export default function App() {
     setToast(msg);
     window.clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setToast(null), 2800);
+  };
+
+  // Marquer un chat comme lu
+  const markChatAsRead = (requestId: string) => {
+    setLastReadTime(me, requestId, Date.now());
+    setUnreadCounts((prev) => {
+      if (!prev[requestId]) return prev;
+      const copy = { ...prev };
+      delete copy[requestId];
+      return copy;
+    });
+    if (chatNotification?.request.id === requestId) {
+      setChatNotification(null);
+    }
+  };
+
+  const openChat = (req: CollabRequest) => {
+    markChatAsRead(req.id);
+    setActiveChatRequest(req);
+    requestNotificationPermission();
   };
 
   // Persistance locale
@@ -115,6 +152,80 @@ export default function App() {
       .finally(() => !cancelled && setBooting(false));
     return () => { cancelled = true; u1(); u2(); };
   }, [uid, demo]);
+
+  // Écoute en direct des nouveaux messages reçus pour tous les projets acceptés (Notifications & Badges)
+  useEffect(() => {
+    const acceptedRequests = requests.filter((r) => r.status === 'accepte');
+    if (acceptedRequests.length === 0) return;
+
+    if (demo) {
+      const unsub = subscribeDemoIncomingMessages(({ request: r, message: m }) => {
+        if (m.senderId === me) return;
+
+        if (activeChatRequest?.id === r.id) {
+          setLastReadTime(me, r.id, Date.now());
+        } else {
+          playNotificationSound();
+          sendBrowserNotification(`Message de ${m.senderName}`, m.text, () => openChat(r));
+          setChatNotification({
+            request: r,
+            message: m,
+            senderPhoto: r.senderId === me ? undefined : r.senderPhoto,
+          });
+          setUnreadCounts((prev) => ({
+            ...prev,
+            [r.id]: (prev[r.id] || 0) + 1,
+          }));
+        }
+      });
+      return () => unsub();
+    }
+
+    const unsubs: (() => void)[] = [];
+    const initialLoadDone: Record<string, boolean> = {};
+
+    acceptedRequests.forEach((req) => {
+      const lastRead = getLastReadTime(me, req.id);
+      const unsub = store.subscribeChat(
+        req.id,
+        (msgs) => {
+          if (!initialLoadDone[req.id]) {
+            initialLoadDone[req.id] = true;
+            const unread = msgs.filter((m) => m.senderId !== me && m.createdAt > lastRead).length;
+            if (unread > 0) {
+              setUnreadCounts((prev) => ({ ...prev, [req.id]: unread }));
+            }
+            return;
+          }
+
+          const latest = msgs[msgs.length - 1];
+          if (!latest || latest.senderId === me) return;
+
+          if (activeChatRequest?.id === req.id) {
+            setLastReadTime(me, req.id, Date.now());
+          } else {
+            playNotificationSound();
+            sendBrowserNotification(`Message de ${latest.senderName}`, latest.text, () => openChat(req));
+            setChatNotification({
+              request: req,
+              message: latest,
+              senderPhoto: req.senderId === me ? undefined : req.senderPhoto,
+            });
+            setUnreadCounts((prev) => ({
+              ...prev,
+              [req.id]: (prev[req.id] || 0) + 1,
+            }));
+          }
+        },
+        () => {}
+      );
+      unsubs.push(unsub);
+    });
+
+    return () => {
+      unsubs.forEach((u) => u());
+    };
+  }, [requests, demo, me, activeChatRequest?.id]);
 
   const cloud = (op: Promise<unknown>) => {
     if (demo) return;
@@ -240,7 +351,7 @@ export default function App() {
       flash('Collaborateur accepté ! Discussion débloquée.');
       const matched = requests.find((x) => x.id === id);
       if (matched) {
-        setActiveChatRequest({ ...matched, status: 'accepte' });
+        openChat({ ...matched, status: 'accepte' });
       }
       if (profile) {
         const updated = {
@@ -279,14 +390,15 @@ export default function App() {
     }
     if (!foundProfile) {
       const relFlash = flashs.find((f) => f.authorId === authorId);
+      const relReq = requests.find((r) => r.senderId === authorId);
       foundProfile = {
         uid: authorId,
         displayName: authorName,
-        email: 'collaborateur@toleka.app',
-        profession: relFlash?.authorProfession ?? 'Créateur',
-        category: relFlash?.targetCategory ?? 'video',
-        photoURL: relFlash?.authorPhoto,
-        skills: [relFlash?.targetSkill ?? 'Artiste'],
+        email: relReq?.contactInfo || 'collaborateur@toleka.app',
+        profession: relReq?.senderProfession ?? relFlash?.authorProfession ?? 'Créateur',
+        category: relFlash?.targetCategory ?? 'photo',
+        photoURL: relReq?.senderPhoto ?? relFlash?.authorPhoto,
+        skills: [relReq?.senderProfession ?? relFlash?.targetSkill ?? 'Artiste'],
         bio: `Créateur actif sur Toleka.`,
         stats: { projectsDone: 1, projectsProposed: 1 }
       };
@@ -299,6 +411,7 @@ export default function App() {
   const outgoing = requests.filter((r) => isMine(r.senderId) && !isMine(r.receiverId));
   const myFlashs = flashs.filter((f) => isMine(f.authorId));
   const pending = incoming.filter((r) => r.status === 'en_attente').length;
+  const totalUnreadMessages = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0);
 
   const feed = useMemo(() => {
     const appliedIds = new Set(requests.filter((r) => isMine(r.senderId)).map((r) => r.flashId));
@@ -482,12 +595,13 @@ export default function App() {
           outgoing={outgoing}
           myFlashs={myFlashs}
           requests={requests}
+          unreadCounts={unreadCounts}
           onDecide={decide}
           onDeleteFlash={deleteFlash}
           onGoCreate={() => setTab('create')}
           onGoSwipe={() => setTab('swipe')}
           onCopy={copy}
-          onOpenChat={(req) => setActiveChatRequest(req)}
+          onOpenChat={openChat}
           onAuthorClick={handleOpenAuthorProfile}
         />
       )}
@@ -583,9 +697,18 @@ export default function App() {
       <nav className="nav" aria-label="Navigation principale" style={{ ['--i' as string]: TABS.indexOf(tab) }}>
         <NavBtn id="swipe" icon={<Zap size={21} />} label="Flashs" />
         <NavBtn id="create" icon={<PlusCircle size={21} />} label="Créer" />
-        <NavBtn id="dashboard" icon={<Inbox size={21} />} label="Dashboard" badge={pending} />
+        <NavBtn id="dashboard" icon={<Inbox size={21} />} label="Dashboard" badge={pending + totalUnreadMessages} />
         <NavBtn id="profile" icon={<UserIcon size={21} />} label="Profil" />
       </nav>
+
+      {/* Toast de notification de message reçu */}
+      {chatNotification && (
+        <ChatNotificationToast 
+          notification={chatNotification}
+          onOpen={(req) => openChat(req)}
+          onDismiss={() => setChatNotification(null)}
+        />
+      )}
 
       {/* Modal Candidature */}
       {applying && (
@@ -616,7 +739,21 @@ export default function App() {
           request={activeChatRequest}
           currentUserId={me}
           currentUserName={profile.displayName}
-          onClose={() => setActiveChatRequest(null)}
+          partnerName={
+            activeChatRequest.senderId === me 
+              ? (flashs.find((f) => f.id === activeChatRequest.flashId)?.authorName || 'Auteur du projet')
+              : activeChatRequest.senderName
+          }
+          partnerPhoto={
+            activeChatRequest.senderId === me
+              ? flashs.find((f) => f.id === activeChatRequest.flashId)?.authorPhoto
+              : activeChatRequest.senderPhoto
+          }
+          onClose={() => {
+            markChatAsRead(activeChatRequest.id);
+            setActiveChatRequest(null);
+          }}
+          onAuthorClick={handleOpenAuthorProfile}
           isDemo={demo}
         />
       )}
