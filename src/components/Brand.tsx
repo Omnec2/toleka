@@ -2,7 +2,19 @@ import { CalendarDays, Handshake, Leaf, Wallet, Zap } from 'lucide-react';
 import type { FlashAnnouncement } from '../types/models';
 import { URGENCY_LABEL } from '../constants';
 
-/** Logo Toleka : un « T » moderne avec point de connexion */
+/** Wordmark seul — police stylée, pas d'icône */
+export function Wordmark({ size }: { size?: number }) {
+  return (
+    <span
+      className="wordmark-only"
+      style={size ? { fontSize: size * 0.038 + 'rem' } : undefined}
+    >
+      toleka
+    </span>
+  );
+}
+
+/** Logo avec icône (conservé pour la splash screen) */
 export function Logo({ size = 36 }: { size?: number }) {
   return (
     <span className="logo-mark" style={{ width: size, height: size, borderRadius: size * 0.34 }}>
@@ -10,15 +22,6 @@ export function Logo({ size = 36 }: { size?: number }) {
         <path d="M4 6.5h13M10.5 6.5V19" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" />
         <circle cx="20" cy="6.5" r="2.1" fill="#fff" />
       </svg>
-    </span>
-  );
-}
-
-export function Wordmark({ size }: { size?: number }) {
-  return (
-    <span className="logo">
-      <Logo size={size} />
-      <span className="wordmark">Toleka</span>
     </span>
   );
 }

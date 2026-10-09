@@ -400,13 +400,13 @@ export default function App() {
                 className={`filter ${filter === 'mine' ? 'on' : ''}`} 
                 onClick={() => { setFilter('mine'); }}
               >
-                <Target size={14} /> Pour moi ({myCat.label})
+                <Target size={14} /> Pour moi
               </button>
               <button 
                 className={`filter ${filter === 'all' ? 'on' : ''}`} 
                 onClick={() => { setFilter('all'); }}
               >
-                <Layers size={14} /> Découverte (Tous les projets)
+                <Layers size={14} /> Découverte
               </button>
             </div>
 
@@ -462,7 +462,7 @@ export default function App() {
                     : "Aucun projet disponible pour le moment."}
                 </p>
                 <div className="row" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
-                  {filter === 'mine' && <button className="btn btn-primary btn-sm" onClick={() => setFilter('all')}>Voir la Découverte (Tous)</button>}
+                  {filter === 'mine' && <button className="btn btn-primary btn-sm" onClick={() => setFilter('all')}>Voir la Découverte</button>}
                   {searchQuery && <button className="btn btn-ghost btn-sm" onClick={() => setSearchQuery('')}>Effacer la recherche</button>}
                   <button className="btn btn-ghost btn-sm" onClick={() => setTab('create')}>Publier un flash</button>
                 </div>
