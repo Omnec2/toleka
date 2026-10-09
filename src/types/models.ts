@@ -5,18 +5,33 @@ export type Category =
   | 'redaction' 
   | 'dev' 
   | 'photo' 
+  | 'acting'
+  | 'model'
   | 'autre';
+
+export interface SocialLinks {
+  instagram?: string;
+  youtube?: string;
+  tiktok?: string;
+  portfolio?: string;
+  linkedin?: string;
+}
 
 export interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
   photoURL?: string;
-  profession: string;       // Son talent / profession (ex: "Monteur Vidéo", "Beatmaker", "Graphiste")
-  category: Category;       // Sa catégorie de prédilection
+  profession: string;       // Son talent ou profession principale
+  category: Category;       // Sa catégorie principale
   bio?: string;
   city?: string;
-  skills: string[];         // Mots-clés / compétences
+  skills: string[];         // Compétences / mots-clés
+  socials?: SocialLinks;    // Liens de réseaux sociaux & portfolio
+  stats?: {
+    projectsDone?: number;      // Projets réalisés
+    projectsProposed?: number;  // Projets proposés
+  };
   createdAt?: any;
 }
 
@@ -26,12 +41,12 @@ export interface FlashAnnouncement {
   authorName: string;
   authorPhoto?: string;
   authorProfession: string;
-  title: string;            // Titre de l'annonce / besoin
-  description: string;      // Détail du projet
-  targetCategory: Category; // Quel talent est recherché
-  targetSkill: string;      // Ex: "Cherche un coloriste DaVinci"
+  title: string;
+  description: string;
+  targetCategory: Category;
+  targetSkill: string;
   urgency: '48h' | 'cette_semaine' | 'flexible';
-  remuneration: 'paye' | 'partage' | 'benevole';
+  remuneration: 'paye' | 'collaboration'; // Rémunéré ou Collaboration
   budget?: string;
   createdAt: number;
 }
@@ -45,8 +60,17 @@ export interface CollabRequest {
   senderPhoto?: string;
   senderProfession: string;
   receiverId: string;
-  message: string;          // Message court de proposition
-  contactInfo: string;      // Email / WhatsApp / Téléphone
+  message: string;
+  contactInfo: string;
   status: 'en_attente' | 'accepte' | 'refuse';
+  createdAt: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  requestId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
   createdAt: number;
 }

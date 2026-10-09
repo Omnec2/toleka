@@ -1,4 +1,4 @@
-import { Camera, Clapperboard, Code, Headphones, Palette, PenLine, Sparkles } from 'lucide-react';
+import { Camera, Clapperboard, Code, Headphones, Palette, PenLine, Sparkles, Theater, UserCheck } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Category, FlashAnnouncement, CollabRequest } from './types/models';
 
@@ -17,6 +17,8 @@ export const CATEGORIES: CategoryMeta[] = [
   { id: 'redaction', label: 'Écriture & Scénario', Icon: PenLine, c1: '#FFC24B', c2: '#FF8A4B' },
   { id: 'dev', label: 'Tech & Dév Web', Icon: Code, c1: '#3FA9FF', c2: '#5B6BFF' },
   { id: 'photo', label: 'Photo & Image', Icon: Camera, c1: '#27D3E6', c2: '#3F8CFF' },
+  { id: 'acting', label: 'Acting & Théâtre', Icon: Theater, c1: '#EC4899', c2: '#F43F5E' },
+  { id: 'model', label: 'Modèle & Mannequin', Icon: UserCheck, c1: '#D946EF', c2: '#8B5CF6' },
   { id: 'autre', label: 'Autre talent', Icon: Sparkles, c1: '#8C93B3', c2: '#B7A6FF' },
 ];
 
@@ -38,7 +40,6 @@ export const timeAgo = (ts: number): string => {
   return `il y a ${Math.floor(h / 24)} j`;
 };
 
-/** Identifiant utilisé pour les données de démonstration appartenant à "moi". */
 export const ME = 'me';
 
 const now = Date.now();
@@ -58,31 +59,23 @@ export const SEED_FLASHS: FlashAnnouncement[] = [
     title: "Compositeur beatmaker pour mon single d'été",
     description: "Mélodies et textes prêts. Je veux une prod fraîche, percussions afrobeats / pop.",
     targetCategory: 'musique', targetSkill: 'Beatmaker / Producteur', urgency: 'cette_semaine',
-    remuneration: 'partage', createdAt: now - 7200000,
+    remuneration: 'collaboration', createdAt: now - 7200000,
   },
   {
-    id: 'f3', authorId: 'u4', authorName: 'Thomas L.', authorProfession: 'Créateur de contenu tech',
+    id: 'f3', authorId: 'u7', authorName: 'Marc V.', authorProfession: 'Directeur de Casting',
     authorPhoto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-    title: 'Graphiste pour refaire mes miniatures YouTube',
-    description: "Chaîne à 45k abonnés. Style percutant et lisible sur smartphone, série de 5 vidéos.",
-    targetCategory: 'design', targetSkill: 'Miniatures Photoshop', urgency: 'flexible',
-    remuneration: 'paye', budget: '150 €', createdAt: now - 12000000,
+    title: "Comédien / Acteur pour rôle principal court-métrage",
+    description: "Tournage prévu sur 2 jours. Profil recherché : jeune adulte expressif, aisance face caméra.",
+    targetCategory: 'acting', targetSkill: 'Jeu d\'acteur & Élocution', urgency: 'cette_semaine',
+    remuneration: 'paye', budget: '300 €', createdAt: now - 8500000,
   },
   {
-    id: 'f4', authorId: 'u6', authorName: 'Léa M.', authorProfession: 'Autrice de webtoon',
-    authorPhoto: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80',
-    title: "Développeur front pour un site portfolio d'artistes",
-    description: "Maquette Figma prête. Site vitrine animé, React ou Next. Mission courte et claire.",
-    targetCategory: 'dev', targetSkill: 'Front-end React', urgency: 'cette_semaine',
-    remuneration: 'paye', budget: '400 €', createdAt: now - 20000000,
-  },
-  {
-    id: 'f5', authorId: 'u7', authorName: 'Yanis K.', authorProfession: 'Directeur artistique',
-    authorPhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',
-    title: 'Photographe pour un shooting streetwear samedi',
-    description: "Lookbook de 12 pièces, lumière naturelle en extérieur. Retouches légères incluses.",
-    targetCategory: 'photo', targetSkill: 'Photographe mode', urgency: '48h',
-    remuneration: 'partage', createdAt: now - 30000000,
+    id: 'f4', authorId: 'u8', authorName: 'Inès T.', authorProfession: 'Créatrice de Marque Mode',
+    authorPhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+    title: "Modèle photo pour shooting collection capsule",
+    description: "Shooting extérieur à la lumière naturelle pour lookbook et campagne Instagram.",
+    targetCategory: 'model', targetSkill: 'Pose & Expression corporelle', urgency: '48h',
+    remuneration: 'collaboration', createdAt: now - 14000000,
   },
   {
     id: 'seed-mine', authorId: ME, authorName: 'Moi', authorProfession: 'Créateur',

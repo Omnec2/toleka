@@ -1,8 +1,8 @@
-import { CalendarDays, Gift, Handshake, Leaf, Wallet, Zap } from 'lucide-react';
+import { CalendarDays, Handshake, Leaf, Wallet, Zap } from 'lucide-react';
 import type { FlashAnnouncement } from '../types/models';
 import { URGENCY_LABEL } from '../constants';
 
-/** Logo Toleka : un « T » dont la barre se prolonge en point lumineux (connexion). */
+/** Logo Toleka : un « T » moderne avec point de connexion */
 export function Logo({ size = 36 }: { size?: number }) {
   return (
     <span className="logo-mark" style={{ width: size, height: size, borderRadius: size * 0.34 }}>
@@ -33,11 +33,11 @@ export function UrgencyChip({ value, glass }: { value: FlashAnnouncement['urgenc
 }
 
 export function RemunChip({ flash }: { flash: Pick<FlashAnnouncement, 'remuneration' | 'budget'> }) {
-  const Icon = flash.remuneration === 'paye' ? Wallet : flash.remuneration === 'partage' ? Handshake : Gift;
-  const label =
-    flash.remuneration === 'paye' ? flash.budget || 'Rémunéré' : flash.remuneration === 'partage' ? 'Partage' : 'Échange';
+  const isPaid = flash.remuneration === 'paye';
+  const Icon = isPaid ? Wallet : Handshake;
+  const label = isPaid ? (flash.budget || 'Rémunéré') : 'Collaboration';
   return (
-    <span className={`chip ${flash.remuneration === 'paye' ? 'chip-ok' : ''}`}>
+    <span className={`chip ${isPaid ? 'chip-ok' : 'chip-brand'}`}>
       <Icon size={13} /> {label}
     </span>
   );

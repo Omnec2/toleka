@@ -1,9 +1,9 @@
 import {
-  collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, setDoc, updateDoc, where,
+  collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, setDoc, updateDoc, where, addDoc
 } from 'firebase/firestore';
 import type { Unsubscribe } from 'firebase/firestore';
 import { db } from './firebase';
-import type { CollabRequest, FlashAnnouncement, UserProfile } from '../types/models';
+import type { CollabRequest, FlashAnnouncement, UserProfile, ChatMessage } from '../types/models';
 
 type ErrCb = (e: Error) => void;
 
@@ -15,7 +15,7 @@ export const subscribeFlashs = (cb: (f: FlashAnnouncement[]) => void, onError: E
     onError,
   );
 
-/** Demandes que j'ai envoyées ou reçues : deux requêtes simples fusionnées (aucun index requis). */
+/** Demandes que j'ai envoyées ou reçues : deux requêtes simples fusionnées. */
 export const subscribeMyRequests = (uid: string, cb: (r: CollabRequest[]) => void, onError: ErrCb): Unsubscribe => {
   const sent = new Map<string, CollabRequest>();
   const received = new Map<string, CollabRequest>();
@@ -46,4 +46,16 @@ export const saveProfile = (p: UserProfile) => setDoc(doc(db, 'users', p.uid), p
 export const fetchProfile = async (uid: string): Promise<UserProfile | null> => {
   const snap = await getDoc(doc(db, 'users', uid));
   return snap.exists() ? (snap.data() as UserProfile) : null;
+};
+
+/** Écoute des messages de chat pour une demande acceptée */
+export const subscribeChat = (requestId: string, cb: (msgs: ChatMessage[]) => void, onError: ErrCb): Unsubscribe =>
+  onSnapshot(
+    query(collection(db, 'requests', requestId, 'messages'), orderBy('createdAt', 'asc')),
+    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() } as ChatMessage))),
+    onError
+  );
+
+export const sendChatMessage = async (requestId: string, msg: Omit<ChatMessage, 'id'>) => {
+  return addDoc(collection(db, 'requests', requestId, 'messages'), msg);
 };

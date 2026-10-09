@@ -34,7 +34,7 @@ export default function CreateFlash({ onPublish }: { onPublish: (d: FlashDraft) 
     <div className="screen">
       <div>
         <h1 className="h1">Nouveau <span className="grad-text">flash</span></h1>
-        <p className="muted">Décrivez votre besoin en 30 secondes.</p>
+        <p className="muted">Publiez votre besoin pour trouver un collaborateur rapidement.</p>
       </div>
 
       <form onSubmit={submit} className="glass panel" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -42,8 +42,16 @@ export default function CreateFlash({ onPublish }: { onPublish: (d: FlashDraft) 
           <label>Quel talent cherchez-vous ?</label>
           <div className="cat-grid">
             {CATEGORIES.map((c) => (
-              <button type="button" key={c.id} className={`cat-opt ${targetCategory === c.id ? 'on' : ''}`} style={{ ['--c1' as string]: c.c1 }} onClick={() => setCategory(c.id)}>
-                <span className="ico" style={{ background: `linear-gradient(135deg, ${c.c1}, ${c.c2})` }}><c.Icon size={18} strokeWidth={2} /></span>
+              <button 
+                type="button" 
+                key={c.id} 
+                className={`cat-opt ${targetCategory === c.id ? 'on' : ''}`} 
+                style={{ ['--c1' as string]: c.c1 }} 
+                onClick={() => setCategory(c.id)}
+              >
+                <span className="ico" style={{ background: `linear-gradient(135deg, ${c.c1}, ${c.c2})` }}>
+                  <c.Icon size={18} strokeWidth={2} />
+                </span>
                 {c.label}
               </button>
             ))}
@@ -54,35 +62,40 @@ export default function CreateFlash({ onPublish }: { onPublish: (d: FlashDraft) 
           <label htmlFor="f-title">Titre de l'annonce *</label>
           <input id="f-title" className="input" required placeholder="Ex : Monteur pour un teaser d'1 min" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
+        
         <div className="field">
-          <label htmlFor="f-skill">Compétence précise</label>
-          <input id="f-skill" className="input" placeholder="DaVinci Resolve, Beatmaker drill, Logo Figma…" value={targetSkill} onChange={(e) => setSkill(e.target.value)} />
+          <label htmlFor="f-skill">Compétence précise attendue</label>
+          <input id="f-skill" className="input" placeholder="Ex: DaVinci Resolve, Modèle lookbook, Acting émotif..." value={targetSkill} onChange={(e) => setSkill(e.target.value)} />
         </div>
+        
         <div className="field">
           <label htmlFor="f-desc">Détails du projet *</label>
-          <textarea id="f-desc" className="input" rows={3} required placeholder="Ce qu'il y a à faire, l'avancement, votre vision…" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <textarea id="f-desc" className="input" rows={3} required placeholder="Expliquez votre projet, les attentes et la vision..." value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
 
         <div className="field">
           <label>Délai</label>
           <div className="segment">
-            {([['48h', '48h'], ['cette_semaine', 'Semaine'], ['flexible', 'Flexible']] as const).map(([v, l]) => (
+            {([['48h', '⚡ 48h'], ['cette_semaine', 'Semaine'], ['flexible', 'Flexible']] as const).map(([v, l]) => (
               <button type="button" key={v} className={urgency === v ? 'on' : ''} onClick={() => setUrgency(v)}>{l}</button>
             ))}
           </div>
         </div>
+
+        {/* Modalité de rémunération : Payé ou Collaboration */}
         <div className="field">
-          <label>Rémunération</label>
+          <label>Mode de rémunération</label>
           <div className="segment">
-            {([['paye', 'Payé'], ['partage', 'Partage'], ['benevole', 'Échange']] as const).map(([v, l]) => (
+            {([['paye', '💰 Rémunéré'], ['collaboration', '🤝 Collaboration']] as const).map(([v, l]) => (
               <button type="button" key={v} className={remuneration === v ? 'on' : ''} onClick={() => setRemun(v)}>{l}</button>
             ))}
           </div>
         </div>
+
         {remuneration === 'paye' && (
           <div className="field">
-            <label htmlFor="f-budget">Budget estimé</label>
-            <input id="f-budget" className="input" placeholder="200 €, 50 €/h, à discuter…" value={budget} onChange={(e) => setBudget(e.target.value)} />
+            <label htmlFor="f-budget">Budget prévu</label>
+            <input id="f-budget" className="input" placeholder="Ex: 250 €, 50 €/h, forfait..." value={budget} onChange={(e) => setBudget(e.target.value)} />
           </div>
         )}
 

@@ -493,3 +493,47 @@ textarea.input { resize: none; line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) {
   .fc-shine, .fc-mesh, .orbit-node { animation: none; }
 }
+
+/* ---------- Bouton Profil Auteur Cliquable ---------- */
+.fc-author-btn {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 44px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  transition: opacity 0.2s;
+}
+.fc-author-btn:hover {
+  opacity: 0.85;
+}
+.fc-author-btn b {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+.fc-author-btn span {
+  font-size: 0.76rem;
+  color: var(--text-2);
+}
+
+/* Boutons flèches de navigation cartes */
+.btn-icon-nav {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-icon-nav:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
