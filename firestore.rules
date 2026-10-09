@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// Règles Firestore de Toleka — à publier dans la console Firebase
+// (Firestore Database > Règles) ou via `firebase deploy --only firestore:rules`.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    // Profils : lisibles par les utilisateurs connectés, modifiables par leur propriétaire
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Flashs : visibles par tous les connectés, gérés par leur auteur
+    match /flashs/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.authorId == request.auth.uid;
+    }
+
+    // Demandes : visibles uniquement par l'expéditeur et le destinataire
+    match /requests/{id} {
+      allow read: if signedIn()
+        && (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.senderId == request.auth.uid;
+      // Seul le destinataire peut changer le statut (accepter / refuser)
+      allow update: if signedIn()
+        && resource.data.receiverId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+    }
+  }
+}
