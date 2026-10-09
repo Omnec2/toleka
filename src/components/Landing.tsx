@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, Sparkles, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
 import { Logo, Wordmark } from './Brand';
 import { SEED_FLASHS, catOf, timeAgo } from '../constants';
 import Avatar from './Avatar';

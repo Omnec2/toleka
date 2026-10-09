@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import type { ReactNode, PointerEvent } from 'react';
-import { Clock, Send, Target, User, Zap, Calendar, ExternalLink } from 'lucide-react';
+import { Clock, Send, Target, Zap, Calendar, ExternalLink } from 'lucide-react';
 import type { FlashAnnouncement, UserProfile } from '../types/models';
 import { catOf, timeAgo } from '../constants';
 import Avatar from './Avatar';
