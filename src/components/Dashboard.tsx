@@ -59,10 +59,82 @@ export default function Dashboard({
         <p className="muted">Gérez vos demandes et échangez avec vos collaborateurs.</p>
       </div>
 
-      <div className="stats">
-        <div className={`glass stat ${pending ? 'hot' : ''}`}><b>{pending}</b><span>À traiter</span></div>
-        <div className="glass stat"><b>{outgoing.length}</b><span>Envoyées</span></div>
-        <div className="glass stat"><b>{myFlashs.length}</b><span>Mes flashs</span></div>
+      {/* Statistiques visuelles et dynamiques */}
+      <div className="dash-visual-stats">
+        {/* 1. À traiter */}
+        <div 
+          className={`dash-kpi-card ${pending > 0 ? 'kpi-pending-active' : ''}`}
+          onClick={() => setTab('in')}
+          role="button"
+          tabIndex={0}
+        >
+          <div className="kpi-top">
+            <span className="kpi-icon kpi-ico-in"><Inbox size={18} /></span>
+            {pending > 0 ? (
+              <span className="kpi-tag-alert">Action requise</span>
+            ) : (
+              <span className="kpi-tag-subtle">À jour</span>
+            )}
+          </div>
+          <div className="kpi-value-row">
+            <span className="kpi-number">{pending}</span>
+            <span className="kpi-label">À traiter</span>
+          </div>
+          <div className="kpi-bar-track">
+            <div 
+              className="kpi-bar-fill kpi-fill-orange" 
+              style={{ width: `${Math.min(pending * 33, 100)}%` }} 
+            />
+          </div>
+        </div>
+
+        {/* 2. Envoyées */}
+        <div 
+          className="dash-kpi-card"
+          onClick={() => setTab('out')}
+          role="button"
+          tabIndex={0}
+        >
+          <div className="kpi-top">
+            <span className="kpi-icon kpi-ico-out"><Send size={18} /></span>
+            <span className="kpi-tag-subtle">
+              {outgoing.filter((r) => r.status === 'accepte').length} validée(s)
+            </span>
+          </div>
+          <div className="kpi-value-row">
+            <span className="kpi-number">{outgoing.length}</span>
+            <span className="kpi-label">Envoyées</span>
+          </div>
+          <div className="kpi-bar-track">
+            <div 
+              className="kpi-bar-fill kpi-fill-blue" 
+              style={{ width: `${Math.min(outgoing.length * 25, 100)}%` }} 
+            />
+          </div>
+        </div>
+
+        {/* 3. Mes flashs */}
+        <div 
+          className="dash-kpi-card"
+          onClick={() => setTab('mine')}
+          role="button"
+          tabIndex={0}
+        >
+          <div className="kpi-top">
+            <span className="kpi-icon kpi-ico-mine"><Rocket size={18} /></span>
+            <span className="kpi-tag-subtle">En ligne</span>
+          </div>
+          <div className="kpi-value-row">
+            <span className="kpi-number">{myFlashs.length}</span>
+            <span className="kpi-label">Mes flashs</span>
+          </div>
+          <div className="kpi-bar-track">
+            <div 
+              className="kpi-bar-fill kpi-fill-purple" 
+              style={{ width: `${Math.min(myFlashs.length * 33, 100)}%` }} 
+            />
+          </div>
+        </div>
       </div>
 
       <div className="segment">

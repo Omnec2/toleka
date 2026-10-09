@@ -44,15 +44,16 @@ export default function UserProfileModal({ profile, onClose }: Props) {
           </div>
         </div>
 
-        {/* Statistiques de projets */}
-        <div className="stats">
-          <div className="glass stat">
-            <b>{profile.stats?.projectsDone ?? 0}</b>
-            <span>Projets réalisés</span>
+        {/* Statistiques de projets discrètes et raffinées */}
+        <div className="profile-stats-discreet">
+          <div className="stat-pill">
+            <span className="stat-pill-num">{profile.stats?.projectsDone ?? 0}</span>
+            <span className="stat-pill-label">Projets réalisés</span>
           </div>
-          <div className="glass stat hot">
-            <b>{profile.stats?.projectsProposed ?? 1}</b>
-            <span>Projets proposés</span>
+          <span className="stat-pill-sep">·</span>
+          <div className="stat-pill">
+            <span className="stat-pill-num hot">{profile.stats?.projectsProposed ?? 1}</span>
+            <span className="stat-pill-label">Projets proposés</span>
           </div>
         </div>
 

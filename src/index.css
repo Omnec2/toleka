@@ -537,3 +537,372 @@ textarea.input { resize: none; line-height: 1.5; }
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
 }
+
+/* ---------- Marquee Démo Landing & CTA Commencer ---------- */
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 8px var(--ok);
+  animation: pulseLive 1.8s infinite;
+}
+@keyframes pulseLive {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.6; }
+}
+
+.landing-marquee-track {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 0 10px;
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+.landing-marquee-track::-webkit-scrollbar {
+  display: none;
+}
+.landing-marquee-inner {
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  animation: marqueeRun 28s linear infinite;
+}
+.landing-marquee-track:hover .landing-marquee-inner {
+  animation-play-state: paused;
+}
+@keyframes marqueeRun {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.demo-card-item {
+  width: 250px;
+  padding: 13px;
+  border-radius: 18px;
+  background: rgba(18, 20, 32, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s var(--ease);
+  user-select: none;
+}
+.demo-card-item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-start-cta {
+  width: 100%;
+  padding: 16px 22px;
+  border-radius: var(--r-full);
+  background: #FFFFFF;
+  color: #11131F;
+  border: none;
+  font-size: 1.05rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 12px 36px rgba(255, 255, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.25s var(--spring);
+}
+.btn-start-cta:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 16px 42px rgba(255, 255, 255, 0.35);
+}
+.btn-start-cta:active {
+  transform: scale(0.98);
+}
+
+/* ---------- Deck & Cartes Flashs Pro ---------- */
+.deck-pro {
+  position: relative;
+  height: clamp(430px, calc(100dvh - 280px), 550px);
+  margin-top: 4px;
+  perspective: 1200px;
+}
+.slot-pro {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
+}
+.slot-pro.top {
+  z-index: 5;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.slot-pro.under {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.flash-card-pro {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 28px;
+  background: linear-gradient(165deg, #141726 0%, #0E101A 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.9), 0 0 40px -20px var(--c1, rgba(124, 108, 255, 0.25));
+  overflow: hidden;
+}
+
+.fc-pro-header {
+  padding: 16px 18px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fc-author-btn-pro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.2s;
+  min-width: 0;
+  flex: 1;
+}
+.fc-author-btn-pro:hover {
+  opacity: 0.85;
+}
+
+.fc-cat-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fc-pro-body {
+  padding: 18px 20px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.fc-pro-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #fff;
+  margin: 0;
+}
+
+.fc-pro-desc {
+  font-size: 0.88rem;
+  color: var(--text-2);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+.fc-skill-target {
+  margin-top: auto;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.fc-pro-footer {
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(10, 12, 20, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.fc-urgency-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.chip-urgency-48h {
+  background: rgba(255, 181, 71, 0.15);
+  border: 1px solid rgba(255, 181, 71, 0.3);
+  color: var(--warn);
+}
+.chip-urgency-week {
+  background: rgba(124, 108, 255, 0.15);
+  border: 1px solid rgba(124, 108, 255, 0.3);
+  color: var(--brand-glow);
+}
+.chip-urgency-flex {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-2);
+}
+
+/* ---------- Stats Profil Discrètes ---------- */
+.profile-stats-discreet {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.stat-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.stat-pill-num {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+}
+.stat-pill-num.hot {
+  background: var(--brand-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.stat-pill-label {
+  font-size: 0.74rem;
+  color: var(--text-2);
+  font-weight: 500;
+}
+.stat-pill-sep {
+  color: var(--text-3);
+  font-size: 1rem;
+}
+
+/* ---------- Stats Tableau de bord Visuelles ---------- */
+.dash-visual-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.dash-kpi-card {
+  padding: 12px 10px 10px;
+  border-radius: var(--r-md);
+  background: rgba(18, 20, 32, 0.7);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+.dash-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  background: rgba(25, 28, 45, 0.85);
+}
+.dash-kpi-card.kpi-pending-active {
+  border-color: rgba(255, 120, 60, 0.5);
+  box-shadow: 0 0 20px -6px rgba(255, 120, 60, 0.35);
+}
+.kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kpi-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.kpi-ico-in {
+  background: rgba(255, 120, 60, 0.15);
+  color: #FF8A4B;
+}
+.kpi-ico-out {
+  background: rgba(63, 169, 255, 0.15);
+  color: #3FA9FF;
+}
+.kpi-ico-mine {
+  background: rgba(180, 92, 255, 0.15);
+  color: #B45CFF;
+}
+.kpi-tag-alert {
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--r-full);
+  background: rgba(255, 92, 122, 0.2);
+  color: #FF5C7A;
+  animation: pulseLive 2s infinite;
+}
+.kpi-tag-subtle {
+  font-size: 0.64rem;
+  color: var(--text-3);
+  font-weight: 600;
+}
+.kpi-value-row {
+  display: flex;
+  flex-direction: column;
+}
+.kpi-number {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
+}
+.kpi-label {
+  font-size: 0.72rem;
+  color: var(--text-2);
+  font-weight: 600;
+}
+.kpi-bar-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  margin-top: 2px;
+}
+.kpi-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s var(--ease);
+}
+.kpi-fill-orange {
+  background: linear-gradient(90deg, #FFC24B, #FF5C7A);
+}
+.kpi-fill-blue {
+  background: linear-gradient(90deg, #3FA9FF, #7C6CFF);
+}
+.kpi-fill-purple {
+  background: linear-gradient(90deg, #B45CFF, #FF5EC8);
+}
+

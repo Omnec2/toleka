@@ -507,15 +507,16 @@ export default function App() {
               )}
             </div>
 
-            {/* Statistiques projets */}
-            <div className="stats" style={{ width: '100%', marginTop: '10px' }}>
-              <div className="glass stat">
-                <b>{profile.stats?.projectsDone ?? 0}</b>
-                <span>Projets réalisés</span>
+            {/* Statistiques projets discrètes */}
+            <div className="profile-stats-discreet" style={{ marginTop: '10px' }}>
+              <div className="stat-pill">
+                <span className="stat-pill-num">{profile.stats?.projectsDone ?? 0}</span>
+                <span className="stat-pill-label">Projets réalisés</span>
               </div>
-              <div className="glass stat hot">
-                <b>{profile.stats?.projectsProposed ?? myFlashs.length}</b>
-                <span>Projets proposés</span>
+              <span className="stat-pill-sep">·</span>
+              <div className="stat-pill">
+                <span className="stat-pill-num hot">{profile.stats?.projectsProposed ?? myFlashs.length}</span>
+                <span className="stat-pill-label">Projets proposés</span>
               </div>
             </div>
 
