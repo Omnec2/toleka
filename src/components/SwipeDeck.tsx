@@ -38,7 +38,13 @@ export function FlashCard({
       <div className="fc-pro-header">
         <button 
           type="button"
-          onClick={() => onAuthorClick?.(flash.authorId, flash.authorName)}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAuthorClick?.(flash.authorId, flash.authorName);
+          }}
           className="fc-author-btn-pro"
           title="Consulter le profil de l'auteur"
         >
@@ -143,6 +149,10 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
   // Drag horizontal de la carte
   const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (isAnimatingRef.current) return;
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('button, a, input, textarea')) {
+      return;
+    }
     startX.current = e.clientX;
     setIsDragging(true);
     e.currentTarget.setPointerCapture(e.pointerId);

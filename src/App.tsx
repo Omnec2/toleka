@@ -382,28 +382,34 @@ export default function App() {
       setViewedProfile(profile);
       return;
     }
-    let foundProfile: UserProfile | null = null;
+
+    // 1. Ouverture IMMÉDIATE à partir des données locales/flashs déjà en mémoire (0ms de latence)
+    const relFlash = flashs.find((f) => f.authorId === authorId);
+    const relReq = requests.find((r) => r.senderId === authorId);
+    const instantProfile: UserProfile = {
+      uid: authorId,
+      displayName: authorName,
+      email: relReq?.contactInfo || 'collaborateur@toleka.app',
+      profession: relReq?.senderProfession ?? relFlash?.authorProfession ?? 'Créateur',
+      category: relFlash?.targetCategory ?? 'photo',
+      photoURL: relReq?.senderPhoto ?? relFlash?.authorPhoto,
+      skills: [relReq?.senderProfession ?? relFlash?.targetSkill ?? 'Artiste'],
+      bio: relFlash ? `Auteur du projet « ${relFlash.title} ».` : `Créateur actif sur Toleka.`,
+      stats: { projectsDone: 1, projectsProposed: 1 }
+    };
+
+    setViewedProfile(instantProfile);
+
+    // 2. Enrichissement asynchrone transparent sans bloquer l'affichage
     if (!demo) {
-      try {
-        foundProfile = await store.fetchProfile(authorId);
-      } catch {}
+      store.fetchProfile(authorId).then((cloudProfile) => {
+        if (cloudProfile) {
+          setViewedProfile((cur) => (cur?.uid === authorId ? { ...instantProfile, ...cloudProfile } : cur));
+        }
+      }).catch(() => {
+        // En cas d'erreur ou d'absence dans users, le profil instantané reste visible
+      });
     }
-    if (!foundProfile) {
-      const relFlash = flashs.find((f) => f.authorId === authorId);
-      const relReq = requests.find((r) => r.senderId === authorId);
-      foundProfile = {
-        uid: authorId,
-        displayName: authorName,
-        email: relReq?.contactInfo || 'collaborateur@toleka.app',
-        profession: relReq?.senderProfession ?? relFlash?.authorProfession ?? 'Créateur',
-        category: relFlash?.targetCategory ?? 'photo',
-        photoURL: relReq?.senderPhoto ?? relFlash?.authorPhoto,
-        skills: [relReq?.senderProfession ?? relFlash?.targetSkill ?? 'Artiste'],
-        bio: `Créateur actif sur Toleka.`,
-        stats: { projectsDone: 1, projectsProposed: 1 }
-      };
-    }
-    setViewedProfile(foundProfile);
   };
 
   // Données filtrées : 'mine' (Pour moi) ou 'all' (Découverte) + Barre de recherche
