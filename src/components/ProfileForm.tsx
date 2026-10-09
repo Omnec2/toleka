@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import type { FormEvent } from 'react';
+import { useState, useRef } from 'react';
+import type { FormEvent, ChangeEvent } from 'react';
 import type { Category, UserProfile, SocialLinks } from '../types/models';
 import { CATEGORIES } from '../constants';
-import { Globe, Camera } from 'lucide-react';
+import { Globe, Upload, Trash2 } from 'lucide-react';
 import { InstagramIcon, YoutubeIcon, LinkedinIcon } from './SocialIcons';
 
 export interface ProfileData {
@@ -28,6 +28,7 @@ export default function ProfileForm({ initial, submitLabel, onSave }: Props) {
   const [city, setCity] = useState(initial?.city ?? '');
   const [bio, setBio] = useState(initial?.bio ?? '');
   const [photoURL, setPhotoURL] = useState(initial?.photoURL ?? '');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Liens de réseaux sociaux
   const [socials, setSocials] = useState<SocialLinks>({
@@ -37,6 +38,29 @@ export default function ProfileForm({ initial, submitLabel, onSave }: Props) {
     portfolio: initial?.socials?.portfolio ?? '',
     linkedin: initial?.socials?.linkedin ?? '',
   });
+
+  // Gestion de l'upload local de photo (conversion en Base64 optimisée)
+  const handlePhotoUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert("Veuillez sélectionner un fichier image valide.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("L'image est un peu volumineuse. Veuillez choisir une image de moins de 2 Mo.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setPhotoURL(result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -54,32 +78,53 @@ export default function ProfileForm({ initial, submitLabel, onSave }: Props) {
   return (
     <form onSubmit={submit} className="glass panel" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       
-      {/* Photo de profil (Lien ou avatar) */}
+      {/* Upload de photo de profil */}
       <div className="field">
-        <label htmlFor="photoURL" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Camera size={14} /> Photo de profil (Lien direct image)
-        </label>
-        <input 
-          id="photoURL" 
-          className="input" 
-          placeholder="https://... (URL de votre photo ou avatar)" 
-          value={photoURL} 
-          onChange={(e) => setPhotoURL(e.target.value)} 
-        />
-        {photoURL && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
+        <label>Photo de profil</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '4px' }}>
+          {photoURL ? (
             <img 
               src={photoURL} 
               alt="Aperçu avatar" 
-              style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--brand)' }}
-              onError={(e) => { (e.target as any).style.display = 'none'; }}
+              style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--brand)' }}
             />
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>Aperçu de votre photo</span>
+          ) : (
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--surface-2)', border: '1px dashed var(--border-strong)', display: 'grid', placeItems: 'center', color: 'var(--text-3)' }}>
+              Photo
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <input 
+              ref={fileInputRef}
+              type="file" 
+              accept="image/*" 
+              onChange={handlePhotoUpload} 
+              style={{ display: 'none' }} 
+            />
+            <button 
+              type="button" 
+              className="btn btn-ghost btn-sm"
+              onClick={() => fileInputRef.current?.click()}
+              style={{ gap: '6px' }}
+            >
+              <Upload size={14} /> Importer une photo
+            </button>
+            {photoURL && (
+              <button 
+                type="button" 
+                className="btn btn-danger-ghost btn-sm"
+                onClick={() => setPhotoURL('')}
+                title="Supprimer la photo"
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Talent & Catégorie */}
+      {/* Domaine d'activité */}
       <div className="field">
         <label>Votre domaine d'activité *</label>
         <div className="cat-grid">
@@ -106,7 +151,7 @@ export default function ProfileForm({ initial, submitLabel, onSave }: Props) {
           id="profession" 
           className="input" 
           required 
-          placeholder="Ex : Comédien cinéma, Mannequin photo, Beatmaker, Monteur…" 
+          placeholder="Ex : Acteur cinéma, Modèle photo, Beatmaker, Monteur…" 
           value={profession} 
           onChange={(e) => setProfession(e.target.value)} 
         />

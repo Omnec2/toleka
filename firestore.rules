@@ -1,7 +1,6 @@
 rules_version = '2';
 
-// Règles Firestore de Toleka — à publier dans la console Firebase
-// (Firestore Database > Règles) ou via `firebase deploy --only firestore:rules`.
+// Règles Firestore de Toleka
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -29,6 +28,21 @@ service cloud.firestore {
       allow update: if signedIn()
         && resource.data.receiverId == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+
+      // Messages de chat dans la sous-collection messages
+      match /messages/{msgId} {
+        allow read: if signedIn()
+          && (
+            get(/databases/$(database)/documents/requests/$(id)).data.senderId == request.auth.uid ||
+            get(/databases/$(database)/documents/requests/$(id)).data.receiverId == request.auth.uid
+          );
+        allow create: if signedIn()
+          && request.resource.data.senderId == request.auth.uid
+          && (
+            get(/databases/$(database)/documents/requests/$(id)).data.senderId == request.auth.uid ||
+            get(/databases/$(database)/documents/requests/$(id)).data.receiverId == request.auth.uid
+          );
+      }
     }
   }
 }

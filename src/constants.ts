@@ -17,8 +17,8 @@ export const CATEGORIES: CategoryMeta[] = [
   { id: 'redaction', label: 'Écriture & Scénario', Icon: PenLine, c1: '#FFC24B', c2: '#FF8A4B' },
   { id: 'dev', label: 'Tech & Dév Web', Icon: Code, c1: '#3FA9FF', c2: '#5B6BFF' },
   { id: 'photo', label: 'Photo & Image', Icon: Camera, c1: '#27D3E6', c2: '#3F8CFF' },
-  { id: 'acting', label: 'Acting & Théâtre', Icon: Theater, c1: '#EC4899', c2: '#F43F5E' },
-  { id: 'model', label: 'Modèle & Mannequin', Icon: UserCheck, c1: '#D946EF', c2: '#8B5CF6' },
+  { id: 'acting', label: 'Acting', Icon: Theater, c1: '#EC4899', c2: '#F43F5E' },
+  { id: 'model', label: 'Model', Icon: UserCheck, c1: '#D946EF', c2: '#8B5CF6' },
   { id: 'autre', label: 'Autre talent', Icon: Sparkles, c1: '#8C93B3', c2: '#B7A6FF' },
 ];
 
@@ -64,7 +64,7 @@ export const SEED_FLASHS: FlashAnnouncement[] = [
   {
     id: 'f3', authorId: 'u7', authorName: 'Marc V.', authorProfession: 'Directeur de Casting',
     authorPhoto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-    title: "Comédien / Acteur pour rôle principal court-métrage",
+    title: "Comédien pour rôle principal court-métrage",
     description: "Tournage prévu sur 2 jours. Profil recherché : jeune adulte expressif, aisance face caméra.",
     targetCategory: 'acting', targetSkill: 'Jeu d\'acteur & Élocution', urgency: 'cette_semaine',
     remuneration: 'paye', budget: '300 €', createdAt: now - 8500000,
@@ -72,7 +72,7 @@ export const SEED_FLASHS: FlashAnnouncement[] = [
   {
     id: 'f4', authorId: 'u8', authorName: 'Inès T.', authorProfession: 'Créatrice de Marque Mode',
     authorPhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-    title: "Modèle photo pour shooting collection capsule",
+    title: "Model photo pour shooting collection capsule",
     description: "Shooting extérieur à la lumière naturelle pour lookbook et campagne Instagram.",
     targetCategory: 'model', targetSkill: 'Pose & Expression corporelle', urgency: '48h',
     remuneration: 'collaboration', createdAt: now - 14000000,

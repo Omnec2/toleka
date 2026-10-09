@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import type { ReactNode, PointerEvent } from 'react';
-import { Clock, Send, Target, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { Clock, Send, Target, User } from 'lucide-react';
 import type { FlashAnnouncement, UserProfile } from '../types/models';
 import { catOf, timeAgo } from '../constants';
 import Avatar from './Avatar';
@@ -85,7 +85,6 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
 
   if (flashs.length === 0) return <>{empty}</>;
 
-  // Gestion du cycle dans la liste
   const current = flashs[index % flashs.length];
   const total = flashs.length;
 
@@ -99,7 +98,7 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
     setIndex((prev) => (prev - 1 + total) % total);
   };
 
-  // Drag horizontal dédié UNIQUEMENT à la navigation visuelle (pas de sélection)
+  // Drag horizontal dédié UNIQUEMENT à la navigation visuelle
   const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
     startX.current = e.clientX;
     setIsDragging(true);
@@ -114,10 +113,9 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
   const handlePointerUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    // Seuil de défilement pour naviguer entre les annonces
-    if (dragX > 75) {
+    if (dragX > 70) {
       prevCard();
-    } else if (dragX < -75) {
+    } else if (dragX < -70) {
       nextCard();
     } else {
       setDragX(0);
@@ -134,31 +132,6 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
   return (
     <>
       <div className="deck-container">
-        {/* Compteur de cartes et navigation flèches */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', padding: '0 4px' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-2)', fontWeight: 600 }}>
-            Projet {index + 1} sur {total}
-          </span>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button 
-              onClick={prevCard} 
-              className="btn-icon-nav"
-              title="Projet précédent"
-              aria-label="Projet précédent"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button 
-              onClick={nextCard} 
-              className="btn-icon-nav"
-              title="Projet suivant"
-              aria-label="Projet suivant"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
-
         <div 
           className="deck"
           onPointerDown={handlePointerDown}
@@ -176,7 +149,7 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
         </div>
       </div>
 
-      {/* Barre d'action : SEUL MOYEN DE SÉLECTIONNER UN PROJET */}
+      {/* Boutons de commande : Suivant / Postuler */}
       <div className="actions" style={{ gap: '12px', marginTop: '16px' }}>
         <button 
           className="btn btn-ghost" 
@@ -198,7 +171,7 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
       </div>
 
       <p className="hint" style={{ marginTop: '6px' }}>
-        👉 Glissez ou utilisez les flèches pour parcourir • Cliquez sur "Postuler" pour collaborer
+        Glissez la carte pour naviguer • Bouton "Postuler" pour collaborer
       </p>
     </>
   );

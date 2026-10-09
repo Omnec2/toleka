@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
-import { Zap, PlusCircle, Inbox, User as UserIcon, LogOut, Sparkles, Target, Layers, Edit3, MapPin, Globe } from 'lucide-react';
+import { Zap, PlusCircle, Inbox, User as UserIcon, LogOut, Sparkles, Target, Layers, Edit3, MapPin, Globe, Search, X } from 'lucide-react';
 import { InstagramIcon, YoutubeIcon, LinkedinIcon } from './components/SocialIcons';
 import { onAuthStateChanged } from 'firebase/auth';
 import confetti from 'canvas-confetti';
 import type { CollabRequest, FlashAnnouncement, UserProfile } from './types/models';
 import { auth, logOut, signInWithGoogle } from './lib/firebase';
 import * as store from './lib/db';
-import { CATEGORIES, ME, SEED_FLASHS, SEED_REQUESTS, catOf } from './constants';
+import { ME, SEED_FLASHS, SEED_REQUESTS, catOf } from './constants';
 import Avatar from './components/Avatar';
 import { Logo, Wordmark } from './components/Brand';
 import Landing from './components/Landing';
@@ -48,7 +48,11 @@ export default function App() {
   const [requests, setRequests] = useState<CollabRequest[]>(() => (isDemo(load('toleka_user', null)) ? load('toleka_requests', SEED_REQUESTS) : []));
 
   const [tab, setTab] = useState<Tab>('swipe');
-  const [filter, setFilter] = useState<'mine' | 'all' | string>('mine');
+  // Filtres demandés : 'mine' (Pour moi) ou 'all' (Découverte)
+  const [filter, setFilter] = useState<'mine' | 'all'>('mine');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+
   const [applying, setApplying] = useState<FlashAnnouncement | null>(null);
   const [message, setMessage] = useState('');
   const [contact, setContact] = useState('');
@@ -171,7 +175,7 @@ export default function App() {
     setIsEditingProfile(false);
     setFilter('mine');
     setTab(isNew ? 'swipe' : 'profile');
-    flash(isNew ? 'Profil créé avec succès !' : 'Profil mis à jour');
+    flash(isNew ? 'Profil configuré avec succès !' : 'Profil mis à jour');
   };
 
   const publish = (d: FlashDraft) => {
@@ -187,7 +191,6 @@ export default function App() {
     setFlashs((f) => [created, ...f]);
     cloud(store.saveFlash(created));
 
-    // Mise à jour stat projets proposés
     if (profile) {
       const updatedProfile = {
         ...profile,
@@ -225,7 +228,7 @@ export default function App() {
     cloud(store.saveRequest(req));
     setApplying(null);
     confetti({ particleCount: 90, spread: 70, origin: { y: 0.75 }, colors: ['#7C6CFF', '#FF5EC8', '#19D79B'] });
-    flash('Candidature envoyée au créateur !');
+    flash('Candidature envoyée !');
   };
 
   const decide = (id: string, status: 'accepte' | 'refuse') => {
@@ -235,12 +238,10 @@ export default function App() {
     if (status === 'accepte') {
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       flash('Collaborateur accepté ! Discussion débloquée.');
-      // Ouvre immédiatement la messagerie
       const matched = requests.find((x) => x.id === id);
       if (matched) {
         setActiveChatRequest({ ...matched, status: 'accepte' });
       }
-      // Incrémente projets réalisés
       if (profile) {
         const updated = {
           ...profile,
@@ -265,13 +266,11 @@ export default function App() {
     flash('Copié dans le presse-papier');
   };
 
-  // Voir le profil complet d'un créateur (auteur ou candidat)
   const handleOpenAuthorProfile = async (authorId: string, authorName: string) => {
     if (authorId === me && profile) {
       setViewedProfile(profile);
       return;
     }
-    // Recherche dans les données locales ou Firestore
     let foundProfile: UserProfile | null = null;
     if (!demo) {
       try {
@@ -279,7 +278,6 @@ export default function App() {
       } catch {}
     }
     if (!foundProfile) {
-      // Profil de secours basé sur le flash
       const relFlash = flashs.find((f) => f.authorId === authorId);
       foundProfile = {
         uid: authorId,
@@ -289,14 +287,14 @@ export default function App() {
         category: relFlash?.targetCategory ?? 'video',
         photoURL: relFlash?.authorPhoto,
         skills: [relFlash?.targetSkill ?? 'Artiste'],
-        bio: `Créateur actif sur la plateforme Toleka.`,
-        stats: { projectsDone: 2, projectsProposed: 1 }
+        bio: `Créateur actif sur Toleka.`,
+        stats: { projectsDone: 1, projectsProposed: 1 }
       };
     }
     setViewedProfile(foundProfile);
   };
 
-  // Données dérivées
+  // Données filtrées : 'mine' (Pour moi) ou 'all' (Découverte) + Barre de recherche
   const incoming = requests.filter((r) => isMine(r.receiverId));
   const outgoing = requests.filter((r) => isMine(r.senderId) && !isMine(r.receiverId));
   const myFlashs = flashs.filter((f) => isMine(f.authorId));
@@ -306,13 +304,25 @@ export default function App() {
     const appliedIds = new Set(requests.filter((r) => isMine(r.senderId)).map((r) => r.flashId));
     return flashs
       .filter((f) => !isMine(f.authorId) && !appliedIds.has(f.id))
-      .filter((f) =>
-        filter === 'all' ? true : filter === 'mine' ? (profile ? f.targetCategory === profile.category : true) : f.targetCategory === filter,
-      )
+      .filter((f) => {
+        if (filter === 'mine' && profile) {
+          return f.targetCategory === profile.category;
+        }
+        return true; // 'all' (Découverte)
+      })
+      .filter((f) => {
+        if (!searchQuery.trim()) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+          f.title.toLowerCase().includes(q) ||
+          f.description.toLowerCase().includes(q) ||
+          f.targetSkill.toLowerCase().includes(q) ||
+          f.authorName.toLowerCase().includes(q)
+        );
+      })
       .sort((a, b) => b.createdAt - a.createdAt);
-  }, [flashs, requests, filter, profile, me]);
+  }, [flashs, requests, filter, profile, searchQuery, me]);
 
-  // ---- Vues ----
   const toastEl = toast && (
     <div className="toast"><Sparkles size={16} color="#FF5EC8" />{toast}</div>
   );
@@ -382,13 +392,54 @@ export default function App() {
       {/* 1. Écran Découverte des Flashs */}
       {tab === 'swipe' && (
         <div className="screen">
-          <div className="filters" role="tablist">
-            <button className={`filter ${filter === 'mine' ? 'on' : ''}`} onClick={() => setFilter('mine')}><Target size={14} /> Pour moi</button>
-            <button className={`filter ${filter === 'all' ? 'on' : ''}`} onClick={() => setFilter('all')}><Layers size={14} /> Tous</button>
-            {CATEGORIES.map((c) => (
-              <button key={c.id} className={`filter ${filter === c.id ? 'on' : ''}`} onClick={() => setFilter(c.id)}><c.Icon size={14} /> {c.label.split(' ')[0]}</button>
-            ))}
+          
+          {/* Barre de filtrage simplifiée : Pour moi / Découverte (Tous) + Bouton Recherche */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="filters" role="tablist" style={{ flex: 1, margin: 0, padding: 0 }}>
+              <button 
+                className={`filter ${filter === 'mine' ? 'on' : ''}`} 
+                onClick={() => { setFilter('mine'); }}
+              >
+                <Target size={14} /> Pour moi ({myCat.label})
+              </button>
+              <button 
+                className={`filter ${filter === 'all' ? 'on' : ''}`} 
+                onClick={() => { setFilter('all'); }}
+              >
+                <Layers size={14} /> Découverte (Tous les projets)
+              </button>
+            </div>
+
+            <button 
+              className={`btn-icon-nav ${showSearch ? 'active' : ''}`}
+              onClick={() => setShowSearch(!showSearch)}
+              title="Rechercher des projets"
+              aria-label="Rechercher des projets"
+              style={{ flexShrink: 0, background: showSearch ? 'var(--brand)' : undefined, color: showSearch ? '#fff' : undefined }}
+            >
+              <Search size={16} />
+            </button>
           </div>
+
+          {/* Champ de recherche déroulant */}
+          {showSearch && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface-2)', padding: '6px 12px', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
+              <Search size={15} color="var(--text-2)" />
+              <input 
+                type="text" 
+                placeholder="Rechercher par mot-clé, profil, compétence..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ background: 'none', border: 'none', padding: '6px 0', fontSize: '0.88rem' }}
+                autoFocus
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} style={{ color: 'var(--text-3)' }}>
+                  <X size={15} />
+                </button>
+              )}
+            </div>
+          )}
 
           <SwipeDeck
             flashs={feed}
@@ -397,15 +448,22 @@ export default function App() {
             onApply={(f) => {
               setApplying(f);
               setContact(user.email ?? '');
-              setMessage(`Bonjour ${f.authorName.split(' ')[0]}, je suis ${profile.profession} et je souhaite collaborer sur ce projet !`);
+              setMessage(`Bonjour ${f.authorName.split(' ')[0]}, je suis ${profile.profession} et je souhaite collaborer sur votre projet !`);
             }}
             empty={
               <div className="glass empty" style={{ marginTop: 20 }}>
                 <span className="empty-ico"><myCat.Icon size={30} /></span>
-                <h2 className="h2">{flashs.length ? 'Tous les flashs consultés !' : 'Aucun projet dans cette catégorie'}</h2>
-                <p className="muted">Vous pouvez voir l'ensemble des annonces ou publier votre propre recherche.</p>
+                <h2 className="h2">{flashs.length ? 'Tous les flashs consultés !' : 'Aucun projet trouvé'}</h2>
+                <p className="muted">
+                  {searchQuery 
+                    ? `Aucun projet ne correspond à "${searchQuery}".` 
+                    : filter === 'mine' 
+                    ? "Aucun projet urgent ne recherche actuellement votre talent. Consultez la section Découverte !" 
+                    : "Aucun projet disponible pour le moment."}
+                </p>
                 <div className="row" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
-                  {filter !== 'all' && flashs.length > 0 && <button className="btn btn-primary btn-sm" onClick={() => setFilter('all')}>Voir tous les flashs</button>}
+                  {filter === 'mine' && <button className="btn btn-primary btn-sm" onClick={() => setFilter('all')}>Voir la Découverte (Tous)</button>}
+                  {searchQuery && <button className="btn btn-ghost btn-sm" onClick={() => setSearchQuery('')}>Effacer la recherche</button>}
                   <button className="btn btn-ghost btn-sm" onClick={() => setTab('create')}>Publier un flash</button>
                 </div>
               </div>
@@ -434,7 +492,7 @@ export default function App() {
         />
       )}
 
-      {/* 4. Page Mon Profil Enrichie */}
+      {/* 4. Page Mon Profil Enrichie avec Upload */}
       {tab === 'profile' && (
         <div className="screen">
           <div className="glass profile-hero">
