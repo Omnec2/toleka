@@ -12,11 +12,11 @@ export interface CategoryMeta {
 
 export const CATEGORIES: CategoryMeta[] = [
   { id: 'video', label: 'Vidéo & Cinéma', Icon: Clapperboard, c1: '#FF5E7E', c2: '#FF9A5E' },
-  { id: 'musique', label: 'Musique & Son', Icon: Headphones, c1: '#16D9A0', c2: '#1AA8D9' },
+  { id: 'musique', label: 'Musique & Son', Icon: Headphones, c1: '#6366F1', c2: '#4F46E5' },
   { id: 'design', label: 'Design & Graphisme', Icon: Palette, c1: '#9B6BFF', c2: '#E057FF' },
   { id: 'redaction', label: 'Écriture & Scénario', Icon: PenLine, c1: '#FFC24B', c2: '#FF8A4B' },
   { id: 'dev', label: 'Tech & Dév Web', Icon: Code, c1: '#3FA9FF', c2: '#5B6BFF' },
-  { id: 'photo', label: 'Photo & Image', Icon: Camera, c1: '#27D3E6', c2: '#3F8CFF' },
+  { id: 'photo', label: 'Photo & Image', Icon: Camera, c1: '#FB923C', c2: '#EA580C' },
   { id: 'acting', label: 'Acting', Icon: Theater, c1: '#EC4899', c2: '#F43F5E' },
   { id: 'model', label: 'Model', Icon: UserCheck, c1: '#D946EF', c2: '#8B5CF6' },
   { id: 'autre', label: 'Autre talent', Icon: Sparkles, c1: '#8C93B3', c2: '#B7A6FF' },
