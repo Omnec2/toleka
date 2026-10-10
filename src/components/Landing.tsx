@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { SEED_FLASHS, catOf, timeAgo } from '../constants';
 import Avatar from './Avatar';
+import { BrandLogo } from './Brand';
 
 interface Props {
   onLogin: () => void;
@@ -68,11 +69,8 @@ export default function Landing({ onLogin, loading }: Props) {
       {/* 1. Hero */}
       <div className="landing-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%' }}>
 
-        {/* Wordmark stylé — texte seul */}
-        <div className="landing-wordmark-wrap">
-          <span className="landing-wordmark">toleka</span>
-          <span className="landing-wordmark-glow" aria-hidden="true">toleka</span>
-        </div>
+        {/* Logo de marque unifié */}
+        <BrandLogo size="clamp(3.2rem, 12vw, 5rem)" glow animated />
 
         {/* Headline */}
         <div style={{ maxWidth: '380px' }}>

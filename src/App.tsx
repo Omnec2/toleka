@@ -9,7 +9,7 @@ import { auth, logOut, signInWithGoogle } from './lib/firebase';
 import * as store from './lib/db';
 import { ME, SEED_FLASHS, SEED_REQUESTS, catOf } from './constants';
 import Avatar from './components/Avatar';
-import { Logo, Wordmark } from './components/Brand';
+import { BrandLogo, Logo, Wordmark } from './components/Brand';
 import Landing from './components/Landing';
 import ProfileForm from './components/ProfileForm';
 import type { ProfileData } from './components/ProfileForm';
@@ -458,8 +458,13 @@ export default function App() {
   if (booting) {
     return (
       <div className="shell splash" aria-busy="true">
-        <div className="splash-logo"><Logo size={72} /></div>
-        <span className="muted">Chargement de votre univers…</span>
+        <div className="splash-logo-wrap">
+          <BrandLogo size={52} glow animated />
+          <div className="splash-bar">
+            <span className="splash-bar-progress" />
+          </div>
+        </div>
+        <span className="muted splash-caption">Chargement de votre univers…</span>
       </div>
     );
   }

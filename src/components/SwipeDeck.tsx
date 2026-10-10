@@ -16,6 +16,7 @@ export function FlashCard({
   onAuthorClick?: (authorId: string, authorName: string) => void; 
 }) {
   const cat = catOf(flash.targetCategory);
+  const CatIcon = cat.Icon;
   const style = { '--c1': cat.c1, '--c2': cat.c2 } as React.CSSProperties;
 
   // Format de la durée / urgence
@@ -34,6 +35,21 @@ export function FlashCard({
 
   return (
     <article className="flash-card-pro" style={style}>
+      {/* Arrière-plan thématique dynamique : icône de catégorie floutée en filigrane subtil & halos ambiants */}
+      <div className="fc-bg-art" aria-hidden="true">
+        {/* Halos lumineux subtils aux couleurs de la catégorie */}
+        <div className="fc-bg-glow fc-bg-glow-1" />
+        <div className="fc-bg-glow fc-bg-glow-2" />
+
+        {/* Grande icône de catégorie en flou subtil d'arrière-plan */}
+        <div className="fc-bg-icon-wrap">
+          <CatIcon className="fc-bg-icon" size={260} strokeWidth={1.3} />
+        </div>
+
+        {/* Trame géométrique texturée subtile */}
+        <div className="fc-bg-pattern" />
+      </div>
+
       {/* 1. Entête professionnelle : Auteur & badges */}
       <div className="fc-pro-header">
         <button 
@@ -125,9 +141,16 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
 
   const total = flashs.length;
   const current = flashs[index % total];
-  const nextFlash = flashs[(index + 1) % total];
 
-  // Déclencher le passage à la carte suivante avec animation complète hors écran
+  // Carte en arrière-plan selon la direction du geste :
+  // - Swipe gauche (dragX < 0 ou exit 'left') : la carte suivante (index + 1)
+  // - Swipe droite (dragX > 0 ou exit 'right') : la carte précédente (index - 1)
+  const isRightSwipe = exitDirection === 'right' || (isDragging && dragX > 0);
+  const underFlash = isRightSwipe
+    ? flashs[(index - 1 + total) % total]
+    : flashs[(index + 1) % total];
+
+  // Déclencher le passage à la carte suivante / précédente avec animation complète hors écran
   const triggerExit = (dir: 'left' | 'right') => {
     if (isAnimatingRef.current) return;
     isAnimatingRef.current = true;
@@ -135,11 +158,11 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
     setDragX(dir === 'right' ? 450 : -450);
 
     setTimeout(() => {
-      setIndex((prev) => (prev + 1) % total);
+      setIndex((prev) => (dir === 'right' ? (prev - 1 + total) % total : (prev + 1) % total));
       setExitDirection(null);
       setDragX(0);
       isAnimatingRef.current = false;
-    }, 300);
+    }, 320);
   };
 
   const nextCard = () => {
@@ -179,7 +202,7 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
 
   const isMatch = (f: FlashAnnouncement) => !!profile && f.targetCategory === profile.category;
 
-  // Calcul du style de la carte du dessus (animation fluide)
+  // Calcul du style de la carte du dessus (animation fluide vers la sortie)
   const getTopCardStyle = (): React.CSSProperties => {
     if (exitDirection) {
       const xOffset = exitDirection === 'right' ? '130vw' : '-130vw';
@@ -198,17 +221,32 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
     };
   };
 
-  // Calcul du style de la carte suivante (qui monte en même temps)
-  const getNextCardStyle = (): React.CSSProperties => {
-    const progress = Math.min(Math.abs(dragX) / 150, 1);
+  // Calcul du style de la carte arrivante :
+  // Cohérence demandée :
+  // - Quand on swap à gauche : la prochaine vient d'en bas (+54px) et monte vers 0
+  // - Quand on swap à droite : inversement, elle vient d'en haut (-54px) et descend vers 0
+  const getUnderCardStyle = (): React.CSSProperties => {
+    const isRight = exitDirection === 'right' || (isDragging && dragX > 0);
+    const progress = Math.min(Math.abs(dragX) / 140, 1);
     const scale = 0.94 + progress * 0.06;
-    const translateY = 14 - progress * 14;
-    const opacity = 0.6 + progress * 0.4;
+    const opacity = 0.55 + progress * 0.45;
+
+    const initialOffset = isRight ? -54 : 54;
+    const translateY = (1 - progress) * initialOffset;
+
+    if (exitDirection) {
+      return {
+        transform: 'scale(1) translateY(0)',
+        opacity: 1,
+        transition: 'transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.28s ease-out',
+        pointerEvents: 'none',
+      };
+    }
 
     return {
       transform: `scale(${scale}) translateY(${translateY}px)`,
       opacity,
-      transition: isDragging ? 'none' : 'transform 0.3s var(--ease), opacity 0.3s var(--ease)',
+      transition: isDragging ? 'none' : 'transform 0.28s var(--ease), opacity 0.28s var(--ease)',
       pointerEvents: 'none',
     };
   };
@@ -223,12 +261,12 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
         >
-          {/* Carte en dessous (prête à apparaître en arrière-plan) */}
+          {/* Carte en dessous (prête à apparaître selon la direction du geste) */}
           {total > 1 && (
-            <div className="slot-pro under" style={getNextCardStyle()}>
+            <div className="slot-pro under" style={getUnderCardStyle()}>
               <FlashCard 
-                flash={nextFlash} 
-                match={isMatch(nextFlash)} 
+                flash={underFlash} 
+                match={isMatch(underFlash)} 
                 onAuthorClick={onAuthorClick} 
               />
             </div>

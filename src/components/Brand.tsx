@@ -2,28 +2,43 @@ import { CalendarDays, Handshake, Leaf, Wallet, Zap } from 'lucide-react';
 import type { FlashAnnouncement } from '../types/models';
 import { URGENCY_LABEL } from '../constants';
 
-/** Wordmark seul — police stylée, pas d'icône */
-export function Wordmark({ size }: { size?: number }) {
+export interface BrandLogoProps {
+  size?: number | string;
+  glow?: boolean;
+  animated?: boolean;
+  className?: string;
+}
+
+/**
+ * Logo Toleka Unifié — Partout le même style, typographie et dégradé premium.
+ * Pas d'icône superflue, typographie distinctive Space Grotesk 900.
+ */
+export function BrandLogo({ size, glow = false, animated = false, className = '' }: BrandLogoProps) {
+  const fontSize = typeof size === 'number' ? `${size}px` : size;
+  const style = fontSize ? { fontSize } : undefined;
+
   return (
-    <span
-      className="wordmark-only"
-      style={size ? { fontSize: size * 0.038 + 'rem' } : undefined}
-    >
-      toleka
+    <span className={`brand-logo-wrap ${animated ? 'brand-logo-animated' : ''} ${className}`}>
+      <span className="brand-logo" style={style}>
+        toleka
+      </span>
+      {glow && (
+        <span className="brand-logo-glow" aria-hidden="true" style={style}>
+          toleka
+        </span>
+      )}
     </span>
   );
 }
 
-/** Logo avec icône (conservé pour la splash screen) */
-export function Logo({ size = 36 }: { size?: number }) {
-  return (
-    <span className="logo-mark" style={{ width: size, height: size, borderRadius: size * 0.34 }}>
-      <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M4 6.5h13M10.5 6.5V19" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" />
-        <circle cx="20" cy="6.5" r="2.1" fill="#fff" />
-      </svg>
-    </span>
-  );
+/** Wordmark (alias de BrandLogo) */
+export function Wordmark({ size, glow }: { size?: number | string; glow?: boolean }) {
+  return <BrandLogo size={size} glow={glow} />;
+}
+
+/** Logo (alias de BrandLogo — remplace l'ancienne icône par le logo toleka officiel unifié) */
+export function Logo({ size = 36, glow }: { size?: number | string; glow?: boolean }) {
+  return <BrandLogo size={size} glow={glow} />;
 }
 
 export function UrgencyChip({ value, glass }: { value: FlashAnnouncement['urgency']; glass?: boolean }) {

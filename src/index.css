@@ -315,26 +315,77 @@ textarea.input { resize: none; line-height: 1.5; }
   transform: translateX(-120%); animation: sweep 5s ease-in-out infinite;
 }
 
-/* Wordmark seul — texte stylé sans icône */
-.wordmark-only {
+/* ==========================================================================
+   Logo & Marque Unifiés — Partout le même style, police Space Grotesk 900
+   ========================================================================== */
+.brand-logo-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  user-select: none;
+  vertical-align: middle;
+}
+.brand-logo {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.45rem;
-  letter-spacing: -0.055em;
-  background: linear-gradient(120deg, #fff 20%, #C9BFFF 55%, #FF9AD8 85%);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  background: linear-gradient(135deg, #ffffff 0%, #D4CCFF 40%, #FF9AD8 75%, #FFD6A5 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   display: inline-block;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+.brand-logo-glow {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(124, 108, 255, 0.65), rgba(255, 94, 200, 0.55));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: blur(20px);
+  user-select: none;
+  pointer-events: none;
+  z-index: 0;
+  line-height: 1;
+}
+.brand-logo-animated .brand-logo-glow {
+  animation: logoGlowBreathe 3s ease-in-out infinite alternate;
+}
+.brand-logo-animated .brand-logo {
+  animation: logoEntrance 0.8s var(--ease) both;
+}
+@keyframes logoEntrance {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes logoGlowBreathe {
+  0% { filter: blur(16px); opacity: 0.5; }
+  100% { filter: blur(28px); opacity: 0.95; }
 }
 
-/* Ancien wordmark (topbar) */
+/* Compatibilité des anciens sélecteurs avec la charte unifiée */
+.wordmark-only,
 .wordmark {
-  font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; letter-spacing: -0.04em;
-  background: linear-gradient(120deg, #fff 30%, #C9BFFF 70%, #FF9AD8);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  background: linear-gradient(135deg, #ffffff 0%, #D4CCFF 40%, #FF9AD8 75%, #FFD6A5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  line-height: 1;
 }
-@keyframes sweep { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+
+/* Topbar avatar */
 .top-avatar { border-radius: 50%; transition: transform 0.3s var(--spring); }
 .top-avatar:hover { transform: scale(1.08) rotate(-4deg); }
 
@@ -346,10 +397,50 @@ textarea.input { resize: none; line-height: 1.5; }
 
 .banner { margin: 0 18px; padding: 8px 14px; border-radius: var(--r-full); font-size: 0.76rem; font-weight: 600; text-align: center; background: rgba(255, 181, 71, 0.1); border: 1px solid rgba(255, 181, 71, 0.28); color: var(--warn); }
 
-/* ---------- Splash ---------- */
-.splash { align-items: center; justify-content: center; gap: 18px; }
-.splash-logo { animation: breathe 1.8s ease-in-out infinite; }
-@keyframes breathe { 50% { transform: scale(1.1); filter: drop-shadow(0 0 28px rgba(180, 92, 255, 0.8)); } }
+/* ---------- Splash / Écran de chargement ---------- */
+.splash { 
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center; 
+  gap: 22px; 
+  min-height: 100dvh;
+}
+.splash-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.splash-bar {
+  width: 140px;
+  height: 3px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+.splash-bar-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 45%;
+  border-radius: var(--r-full);
+  background: var(--brand-grad);
+  animation: splashLoader 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes splashLoader {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(120%); }
+  100% { transform: translateX(260%); }
+}
+.splash-caption {
+  font-size: 0.88rem;
+  color: var(--text-2);
+  letter-spacing: 0.01em;
+  animation: fadeIn 0.6s ease both;
+}
 
 /* ---------- Boutons ---------- */
 .btn { position: relative; overflow: hidden; }
@@ -694,10 +785,83 @@ textarea.input { resize: none; line-height: 1.5; }
   display: flex;
   flex-direction: column;
   border-radius: 28px;
-  background: linear-gradient(165deg, #141726 0%, #0E101A 100%);
+  background: linear-gradient(165deg, #131627 0%, #0c0e18 100%);
   border: 1.5px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.9), 0 0 40px -20px var(--c1, rgba(124, 108, 255, 0.25));
+  box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.9), 0 0 50px -25px var(--c1, rgba(124, 108, 255, 0.25));
   overflow: hidden;
+}
+
+/* ---------- Arrière-plan Flash Card Dynamique & Flouté ---------- */
+.fc-bg-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Halos colorés doux aux couleurs de la catégorie */
+.fc-bg-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(65px);
+  pointer-events: none;
+}
+.fc-bg-glow-1 {
+  width: 250px;
+  height: 250px;
+  top: -40px;
+  right: -50px;
+  background: radial-gradient(circle, var(--c1, #7C6CFF) 0%, transparent 70%);
+  opacity: 0.22;
+}
+.fc-bg-glow-2 {
+  width: 220px;
+  height: 220px;
+  bottom: -30px;
+  left: -40px;
+  background: radial-gradient(circle, var(--c2, #FF5EC8) 0%, transparent 70%);
+  opacity: 0.16;
+}
+
+/* Icône de catégorie en filigrane flouté avec effet subtil */
+.fc-bg-icon-wrap {
+  position: absolute;
+  right: -25px;
+  bottom: 25px;
+  width: 260px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transform: rotate(-10deg);
+  opacity: 0.07;
+  filter: blur(7px) drop-shadow(0 0 35px var(--c1, #7C6CFF));
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.fc-bg-icon {
+  color: var(--c1, #fff);
+  width: 100%;
+  height: 100%;
+}
+
+/* Trame géométrique texturée subtile */
+.fc-bg-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: 0.35;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%);
+}
+
+.fc-pro-header,
+.fc-pro-body,
+.fc-pro-footer {
+  position: relative;
+  z-index: 2;
 }
 
 .fc-pro-header {
