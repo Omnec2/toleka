@@ -26,7 +26,7 @@ const DEMO_CARDS = SEED_FLASHS.filter(f => f.id !== 'seed-mine').concat([
     authorName: 'Léa M.',
     authorProfession: 'Photographe & Retoucheuse',
     authorPhoto: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=200&q=80',
-    title: 'Photographe pour book artistique portrait',
+    title: 'Je cherche un photographe pour book artistique portrait',
     description: 'Session photo en studio pour créer un book de portraits artistiques avec éclairage cinématique.',
     targetCategory: 'photo' as const,
     targetSkill: 'Portrait & Studio',

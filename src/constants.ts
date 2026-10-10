@@ -48,7 +48,7 @@ export const SEED_FLASHS: FlashAnnouncement[] = [
   {
     id: 'f1', authorId: 'u2', authorName: 'Karim D.', authorProfession: 'Réalisateur & Scénariste',
     authorPhoto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-    title: "Un monteur pour mon court-métrage de 7 min",
+    title: "Je cherche un monteur pour mon court-métrage de 7 min",
     description: "Rushs triés et synchronisés sous Premiere. Ambiance polar urbain. Premier cut attendu pour vendredi.",
     targetCategory: 'video', targetSkill: 'Montage Premiere / DaVinci', urgency: '48h',
     remuneration: 'paye', budget: '250 €', createdAt: now - 3600000,
@@ -56,7 +56,7 @@ export const SEED_FLASHS: FlashAnnouncement[] = [
   {
     id: 'f2', authorId: 'u3', authorName: 'Sarah B.', authorProfession: 'Chanteuse Pop & RnB',
     authorPhoto: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
-    title: "Compositeur beatmaker pour mon single d'été",
+    title: "Je cherche un compositeur beatmaker pour mon single d'été",
     description: "Mélodies et textes prêts. Je veux une prod fraîche, percussions afrobeats / pop.",
     targetCategory: 'musique', targetSkill: 'Beatmaker / Producteur', urgency: 'cette_semaine',
     remuneration: 'collaboration', createdAt: now - 7200000,
@@ -64,7 +64,7 @@ export const SEED_FLASHS: FlashAnnouncement[] = [
   {
     id: 'f3', authorId: 'u7', authorName: 'Marc V.', authorProfession: 'Directeur de Casting',
     authorPhoto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-    title: "Comédien pour rôle principal court-métrage",
+    title: "Je cherche un comédien pour rôle principal court-métrage",
     description: "Tournage prévu sur 2 jours. Profil recherché : jeune adulte expressif, aisance face caméra.",
     targetCategory: 'acting', targetSkill: 'Jeu d\'acteur & Élocution', urgency: 'cette_semaine',
     remuneration: 'paye', budget: '300 €', createdAt: now - 8500000,
@@ -72,14 +72,14 @@ export const SEED_FLASHS: FlashAnnouncement[] = [
   {
     id: 'f4', authorId: 'u8', authorName: 'Inès T.', authorProfession: 'Créatrice de Marque Mode',
     authorPhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-    title: "Model photo pour shooting collection capsule",
+    title: "Je cherche un model photo pour shooting collection capsule",
     description: "Shooting extérieur à la lumière naturelle pour lookbook et campagne Instagram.",
     targetCategory: 'model', targetSkill: 'Pose & Expression corporelle', urgency: '48h',
     remuneration: 'collaboration', createdAt: now - 14000000,
   },
   {
     id: 'seed-mine', authorId: ME, authorName: 'Moi', authorProfession: 'Créateur',
-    title: "Illustrateur pour une pochette d'album",
+    title: "Je cherche un illustrateur pour une pochette d'album",
     description: "EP de 5 titres, univers sombre et onirique. Je cherche un style marqué.",
     targetCategory: 'design', targetSkill: 'Illustration digitale', urgency: 'cette_semaine',
     remuneration: 'paye', budget: '200 €', createdAt: now - 86400000,
