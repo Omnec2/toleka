@@ -112,7 +112,7 @@ export default function Landing({ onLogin, loading }: Props) {
                     </div>
                     <span style={{
                       fontSize: '0.66rem', padding: '2px 7px', borderRadius: 'var(--r-full)',
-                      background: f.remuneration === 'paye' ? 'rgba(25, 215, 155, 0.15)' : 'rgba(124, 108, 255, 0.15)',
+                      background: f.remuneration === 'paye' ? 'rgba(25, 215, 155, 0.15)' : 'rgba(245, 165, 36, 0.15)',
                       color: f.remuneration === 'paye' ? 'var(--ok)' : 'var(--brand-glow)',
                       fontWeight: 700, whiteSpace: 'nowrap'
                     }}>

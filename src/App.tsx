@@ -9,7 +9,7 @@ import { auth, logOut, signInWithGoogle } from './lib/firebase';
 import * as store from './lib/db';
 import { ME, SEED_FLASHS, SEED_REQUESTS, catOf } from './constants';
 import Avatar from './components/Avatar';
-import { BrandLogo, Logo, Wordmark } from './components/Brand';
+import { BrandLogo, Wordmark } from './components/Brand';
 import Landing from './components/Landing';
 import ProfileForm from './components/ProfileForm';
 import type { ProfileData } from './components/ProfileForm';
@@ -338,7 +338,7 @@ export default function App() {
     setRequests((r) => [req, ...r]);
     cloud(store.saveRequest(req));
     setApplying(null);
-    confetti({ particleCount: 90, spread: 70, origin: { y: 0.75 }, colors: ['#7C6CFF', '#FF5EC8', '#19D79B'] });
+    confetti({ particleCount: 90, spread: 70, origin: { y: 0.75 }, colors: ['#F5A524', '#FFD27A', '#ECEDEF'] });
     flash('Candidature envoyée !');
   };
 
@@ -443,7 +443,7 @@ export default function App() {
   }, [flashs, requests, filter, profile, searchQuery, me]);
 
   const toastEl = toast && (
-    <div className="toast"><Sparkles size={16} color="#FF5EC8" />{toast}</div>
+    <div className="toast"><Sparkles size={16} color="#F5A524" />{toast}</div>
   );
 
   if (!user) {

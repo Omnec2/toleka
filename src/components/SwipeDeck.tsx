@@ -99,7 +99,7 @@ export function FlashCard({
         </div>
 
         {match && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', alignSelf: 'flex-start', padding: '4px 10px', borderRadius: 'var(--r-full)', background: 'rgba(124, 108, 255, 0.15)', border: '1px solid rgba(124, 108, 255, 0.3)', color: 'var(--brand-glow)', fontSize: '0.74rem', fontWeight: 700 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', alignSelf: 'flex-start', padding: '4px 10px', borderRadius: 'var(--r-full)', background: 'var(--brand-soft)', border: '1px solid var(--brand-line)', color: 'var(--brand-glow)', fontSize: '0.74rem', fontWeight: 700 }}>
             <Target size={13} /> Correspond à votre profil
           </div>
         )}

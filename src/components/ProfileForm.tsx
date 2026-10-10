@@ -136,7 +136,7 @@ export default function ProfileForm({ initial, submitLabel, onSave }: Props) {
               style={{ ['--c1' as string]: c.c1 }}
               onClick={() => setCategory(c.id)}
             >
-              <span className="ico" style={{ background: `linear-gradient(135deg, ${c.c1}, ${c.c2})` }}>
+              <span className="ico" style={{ ['--c1' as string]: c.c1 }}>
                 <c.Icon size={18} strokeWidth={2} />
               </span>
               {c.label}

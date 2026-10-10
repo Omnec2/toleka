@@ -78,7 +78,7 @@ export default function Dashboard({
             {pending > 0 ? (
               <span className="kpi-tag-alert">Action requise</span>
             ) : inUnread > 0 ? (
-              <span className="kpi-tag-alert" style={{ background: 'rgba(255, 94, 200, 0.2)', color: '#FF5EC8' }}>
+              <span className="kpi-tag-alert" style={{ background: 'rgba(245, 165, 36, 0.16)', color: '#F5A524' }}>
                 {inUnread} msg non lu{inUnread > 1 ? 's' : ''}
               </span>
             ) : (
@@ -107,7 +107,7 @@ export default function Dashboard({
           <div className="kpi-top">
             <span className="kpi-icon kpi-ico-out"><Send size={18} /></span>
             {outUnread > 0 ? (
-              <span className="kpi-tag-alert" style={{ background: 'rgba(255, 94, 200, 0.2)', color: '#FF5EC8' }}>
+              <span className="kpi-tag-alert" style={{ background: 'rgba(245, 165, 36, 0.16)', color: '#F5A524' }}>
                 {outUnread} msg non lu{outUnread > 1 ? 's' : ''}
               </span>
             ) : (
@@ -287,7 +287,7 @@ export default function Dashboard({
             return (
               <div key={f.id} className="glass item" style={{ animationDelay: `${i * 60}ms` }}>
                 <div className="item-head">
-                  <span className="tile" style={{ background: `linear-gradient(135deg, ${c.c1}, ${c.c2})` }}><c.Icon size={22} /></span>
+                  <span className="cat-tile" style={{ ['--c1' as string]: c.c1 }}><c.Icon size={22} /></span>
                   <div className="grow"><b>{f.title}</b><span>{f.targetSkill} · {timeAgo(f.createdAt)}</span></div>
                 </div>
                 <div className="row" style={{ alignItems: 'center', justifyContent: 'space-between' }}>
