@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut } from 'firebase/auth';
 import { getFirestore, initializeFirestore } from 'firebase/firestore';
 
 // Configuration web Firebase lue depuis les variables d'environnement (.env, non versionné).
@@ -38,10 +38,28 @@ isSupported()
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-/** Connexion Google (seul moyen d'authentification de Toleka). */
+/** Connexion Google en production (popup avec repli automatique sur redirection si popup bloquée sur mobile) */
 export const signInWithGoogle = async () => {
-  const result = await signInWithPopup(auth, googleProvider);
-  return result.user;
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    return result.user;
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code;
+    if (code === 'auth/popup-blocked') {
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    }
+    throw err;
+  }
+};
+
+export const checkRedirectLogin = async () => {
+  try {
+    const res = await getRedirectResult(auth);
+    return res?.user ?? null;
+  } catch {
+    return null;
+  }
 };
 
 export const logOut = () => signOut(auth);

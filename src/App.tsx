@@ -5,9 +5,9 @@ import { InstagramIcon, YoutubeIcon, LinkedinIcon } from './components/SocialIco
 import { onAuthStateChanged } from 'firebase/auth';
 import confetti from 'canvas-confetti';
 import type { CollabRequest, FlashAnnouncement, UserProfile, ChatMessage } from './types/models';
-import { auth, logOut, signInWithGoogle } from './lib/firebase';
+import { auth, logOut, signInWithGoogle, checkRedirectLogin } from './lib/firebase';
 import * as store from './lib/db';
-import { ME, SEED_FLASHS, SEED_REQUESTS, catOf } from './constants';
+import { ME, catOf } from './constants';
 import Avatar from './components/Avatar';
 import { BrandLogo, Wordmark } from './components/Brand';
 import Landing from './components/Landing';
@@ -41,6 +41,19 @@ const TABS: Tab[] = ['swipe', 'create', 'dashboard', 'profile'];
 
 const isDemo = (u: SessionUser | null) => !!u && u.uid.startsWith('demo-');
 
+// Nettoyage proactif de toute session démo résiduelle pour la production
+if (typeof window !== 'undefined') {
+  try {
+    const rawUser = localStorage.getItem('toleka_user');
+    if (rawUser && rawUser.includes('demo-')) {
+      localStorage.removeItem('toleka_user');
+      localStorage.removeItem('toleka_profile');
+      localStorage.removeItem('toleka_flashs');
+      localStorage.removeItem('toleka_requests');
+    }
+  } catch {}
+}
+
 const load = <T,>(key: string, fallback: T): T => {
   try {
     const raw = localStorage.getItem(key);
@@ -51,10 +64,16 @@ const load = <T,>(key: string, fallback: T): T => {
 };
 
 export default function App() {
-  const [user, setUser] = useState<SessionUser | null>(() => load('toleka_user', null));
-  const [profile, setProfile] = useState<UserProfile | null>(() => load('toleka_profile', null));
-  const [flashs, setFlashs] = useState<FlashAnnouncement[]>(() => (isDemo(load('toleka_user', null)) ? load('toleka_flashs', SEED_FLASHS) : []));
-  const [requests, setRequests] = useState<CollabRequest[]>(() => (isDemo(load('toleka_user', null)) ? load('toleka_requests', SEED_REQUESTS) : []));
+  const [user, setUser] = useState<SessionUser | null>(() => {
+    const u = load<SessionUser | null>('toleka_user', null);
+    return isDemo(u) ? null : u;
+  });
+  const [profile, setProfile] = useState<UserProfile | null>(() => {
+    const u = load<SessionUser | null>('toleka_user', null);
+    return isDemo(u) ? null : load('toleka_profile', null);
+  });
+  const [flashs, setFlashs] = useState<FlashAnnouncement[]>([]);
+  const [requests, setRequests] = useState<CollabRequest[]>([]);
 
   const [tab, setTab] = useState<Tab>('swipe');
   // Filtres demandés : 'mine' (Pour moi) ou 'all' (Découverte)
@@ -122,15 +141,24 @@ export default function App() {
   useEffect(() => { if (demo) localStorage.setItem('toleka_requests', JSON.stringify(requests)); }, [requests, demo]);
 
   // Session Firebase
-  useEffect(
-    () =>
-      onAuthStateChanged(auth, (u) => {
-        if (u) setUser({ uid: u.uid, displayName: u.displayName, email: u.email, photoURL: u.photoURL });
-        else setUser((cur) => (isDemo(cur) ? cur : null));
-        setBooting((b) => (u ? b : false));
-      }),
-    [],
-  );
+  useEffect(() => {
+    checkRedirectLogin().then((u) => {
+      if (u) {
+        setUser({ uid: u.uid, displayName: u.displayName, email: u.email, photoURL: u.photoURL });
+      }
+    });
+
+    const unsub = onAuthStateChanged(auth, (u) => {
+      if (u) {
+        setUser({ uid: u.uid, displayName: u.displayName, email: u.email, photoURL: u.photoURL });
+      } else {
+        setUser(null);
+      }
+      setBooting(false);
+    });
+
+    return () => unsub();
+  }, []);
 
   // Synchronisation temps réel Firestore
   const uid = user?.uid;
@@ -239,16 +267,15 @@ export default function App() {
     setLoggingIn(true);
     try {
       const u = await signInWithGoogle();
-      setUser({ uid: u.uid, displayName: u.displayName, email: u.email, photoURL: u.photoURL });
-    } catch (e) {
-      const code = (e as { code?: string }).code;
-      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      if (u) {
+        setUser({ uid: u.uid, displayName: u.displayName, email: u.email, photoURL: u.photoURL });
+      }
+    } catch (e: unknown) {
+      const err = e as { code?: string; message?: string };
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
         flash('Connexion annulée');
       } else {
-        setFlashs(SEED_FLASHS);
-        setRequests(SEED_REQUESTS);
-        setUser({ uid: 'demo-' + Date.now(), displayName: 'Artiste Démo', email: 'demo@toleka.app', photoURL: null });
-        flash('Mode démo local activé');
+        flash(`Erreur de connexion : ${err.code || err.message || 'échec'}`);
       }
     } finally {
       setLoggingIn(false);
@@ -501,9 +528,9 @@ export default function App() {
       {toastEl}
 
 
-      {(demo || cloudError) && (
+      {cloudError && (
         <div className="banner">
-          {demo ? 'Mode démo local' : 'Mode hors ligne'}
+          Mode hors ligne
         </div>
       )}
 

@@ -75,15 +75,6 @@ export default function Dashboard({
         >
           <div className="kpi-top">
             <span className="kpi-icon kpi-ico-in"><Inbox size={18} /></span>
-            {pending > 0 ? (
-              <span className="kpi-tag-alert">Action requise</span>
-            ) : inUnread > 0 ? (
-              <span className="kpi-tag-alert" style={{ background: 'rgba(245, 165, 36, 0.16)', color: '#F5A524' }}>
-                {inUnread} msg non lu{inUnread > 1 ? 's' : ''}
-              </span>
-            ) : (
-              <span className="kpi-tag-subtle">À jour</span>
-            )}
           </div>
           <div className="kpi-value-row">
             <span className="kpi-number">{pending}</span>
@@ -106,15 +97,6 @@ export default function Dashboard({
         >
           <div className="kpi-top">
             <span className="kpi-icon kpi-ico-out"><Send size={18} /></span>
-            {outUnread > 0 ? (
-              <span className="kpi-tag-alert" style={{ background: 'rgba(245, 165, 36, 0.16)', color: '#F5A524' }}>
-                {outUnread} msg non lu{outUnread > 1 ? 's' : ''}
-              </span>
-            ) : (
-              <span className="kpi-tag-subtle">
-                {outgoing.filter((r) => r.status === 'accepte').length} validée(s)
-              </span>
-            )}
           </div>
           <div className="kpi-value-row">
             <span className="kpi-number">{outgoing.length}</span>
@@ -137,7 +119,6 @@ export default function Dashboard({
         >
           <div className="kpi-top">
             <span className="kpi-icon kpi-ico-mine"><Rocket size={18} /></span>
-            <span className="kpi-tag-subtle">En ligne</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-number">{myFlashs.length}</span>
