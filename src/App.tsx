@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
-import { Zap, PlusCircle, Inbox, User as UserIcon, LogOut, Sparkles, Target, Layers, Edit3, MapPin, Globe, Search, X } from 'lucide-react';
+import { Zap, PlusCircle, Inbox, User as UserIcon, LogOut, Sparkles, Target, Layers, Edit3, MapPin, Globe, Search, X, Download } from 'lucide-react';
 import { InstagramIcon, YoutubeIcon, LinkedinIcon } from './components/SocialIcons';
 import { onAuthStateChanged } from 'firebase/auth';
 import confetti from 'canvas-confetti';
@@ -20,6 +20,8 @@ import Dashboard from './components/Dashboard';
 import ChatModal from './components/ChatModal';
 import UserProfileModal from './components/UserProfileModal';
 import ChatNotificationToast from './components/ChatNotificationToast';
+import InstallPwaBanner from './components/InstallPwaBanner';
+import { isStandalone, promptInstallApp } from './lib/pwa';
 import {
   playNotificationSound,
   sendBrowserNotification,
@@ -399,6 +401,12 @@ export default function App() {
     flash('Flash supprimé');
   };
 
+  const updateFlash = (id: string, updates: FlashDraft) => {
+    setFlashs((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)));
+    cloud(store.updateFlash(id, updates));
+    flash('Flash modifié avec succès !');
+  };
+
   const copy = (text: string) => {
     navigator.clipboard?.writeText(text);
     flash('Copié dans le presse-papier');
@@ -477,6 +485,7 @@ export default function App() {
     return (
       <div className="shell">
         {toastEl}
+        <InstallPwaBanner />
         <Landing onLogin={login} loading={loggingIn} />
       </div>
     );
@@ -533,6 +542,8 @@ export default function App() {
           Mode hors ligne
         </div>
       )}
+
+      <InstallPwaBanner />
 
       {/* 1. Écran Découverte des Flashs */}
       {tab === 'swipe' && (
@@ -630,6 +641,7 @@ export default function App() {
           unreadCounts={unreadCounts}
           onDecide={decide}
           onDeleteFlash={deleteFlash}
+          onUpdateFlash={updateFlash}
           onGoCreate={() => setTab('create')}
           onGoSwipe={() => setTab('swipe')}
           onCopy={copy}
@@ -713,6 +725,18 @@ export default function App() {
                 <LogOut size={15} />
               </button>
             </div>
+
+            {!isStandalone() && (
+              <button 
+                type="button"
+                className="btn btn-ghost btn-sm" 
+                style={{ width: '100%', marginTop: '8px', gap: '6px', fontSize: '0.8rem', border: '1px dashed rgba(245, 165, 36, 0.4)' }}
+                onClick={() => promptInstallApp()}
+              >
+                <Download size={14} color="var(--brand)" />
+                <span>Installer l'application sur cet appareil</span>
+              </button>
+            )}
           </div>
 
           {/* Formulaire de modification */}

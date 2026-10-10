@@ -37,6 +37,8 @@ export const subscribeMyRequests = (uid: string, cb: (r: CollabRequest[]) => voi
 };
 
 export const saveFlash = (f: FlashAnnouncement) => setDoc(doc(db, 'flashs', f.id), f);
+export const updateFlash = (id: string, updates: Partial<FlashAnnouncement>) =>
+  updateDoc(doc(db, 'flashs', id), updates);
 export const removeFlash = (id: string) => deleteDoc(doc(db, 'flashs', id));
 export const saveRequest = (r: CollabRequest) => setDoc(doc(db, 'requests', r.id), r);
 export const setRequestStatus = (id: string, status: CollabRequest['status']) =>

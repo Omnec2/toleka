@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { Check, Copy, Inbox, Mail, MessageSquare, PartyPopper, Rocket, Send, Trash2, Zap } from 'lucide-react';
+import { Check, Copy, Edit3, Inbox, Mail, MessageSquare, PartyPopper, Rocket, Send, Trash2, Zap } from 'lucide-react';
 import type { CollabRequest, FlashAnnouncement } from '../types/models';
 import { catOf, timeAgo } from '../constants';
 import Avatar from './Avatar';
+import EditFlashModal from './EditFlashModal';
+import type { FlashDraft } from './CreateFlash';
 
 interface Props {
   incoming: CollabRequest[];
@@ -13,6 +15,7 @@ interface Props {
   unreadCounts?: Record<string, number>;
   onDecide: (id: string, status: 'accepte' | 'refuse') => void;
   onDeleteFlash: (id: string) => void;
+  onUpdateFlash?: (id: string, updates: FlashDraft) => void;
   onGoCreate: () => void;
   onGoSwipe: () => void;
   onCopy: (text: string) => void;
@@ -45,6 +48,7 @@ export default function Dashboard({
   unreadCounts = {},
   onDecide, 
   onDeleteFlash, 
+  onUpdateFlash,
   onGoCreate, 
   onGoSwipe, 
   onCopy,
@@ -52,6 +56,7 @@ export default function Dashboard({
   onAuthorClick
 }: Props) {
   const [tab, setTab] = useState<'in' | 'out' | 'mine'>('in');
+  const [editingFlash, setEditingFlash] = useState<FlashAnnouncement | null>(null);
   const pending = incoming.filter((r) => r.status === 'en_attente').length;
 
   const inUnread = incoming.reduce((acc, r) => acc + (unreadCounts[r.id] || 0), 0);
@@ -265,20 +270,65 @@ export default function Dashboard({
           {myFlashs.map((f, i) => {
             const c = catOf(f.targetCategory);
             const n = requests.filter((r) => r.flashId === f.id).length;
+            const urgencyLabel = f.urgency === '48h' ? '⚡ 48h' : f.urgency === 'cette_semaine' ? 'Semaine' : 'Flexible';
             return (
               <div key={f.id} className="glass item" style={{ animationDelay: `${i * 60}ms` }}>
                 <div className="item-head">
                   <span className="cat-tile" style={{ ['--c1' as string]: c.c1 }}><c.Icon size={22} /></span>
-                  <div className="grow"><b>{f.title}</b><span>{f.targetSkill} · {timeAgo(f.createdAt)}</span></div>
-                </div>
-                <div className="row" style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div className="grow">
+                    <b>{f.title}</b>
+                    <span>{f.targetSkill} · {timeAgo(f.createdAt)}</span>
+                  </div>
                   <span className={`chip ${n ? 'chip-brand' : ''}`}>{n} candidature{n > 1 ? 's' : ''}</span>
-                  <button className="btn btn-danger-ghost btn-sm" onClick={() => onDeleteFlash(f.id)}><Trash2 size={14} /> Supprimer</button>
+                </div>
+
+                {f.description && (
+                  <p className="muted" style={{ margin: '4px 0 0', fontSize: '0.85rem', lineHeight: 1.4 }}>
+                    {f.description}
+                  </p>
+                )}
+
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span className="chip" style={{ fontSize: '0.72rem' }}>{urgencyLabel}</span>
+                  <span className={`chip ${f.remuneration === 'paye' ? 'chip-ok' : ''}`} style={{ fontSize: '0.72rem' }}>
+                    {f.remuneration === 'paye' ? (f.budget ? `💰 ${f.budget}` : '💰 Rémunéré') : '🤝 Collaboration'}
+                  </span>
+                </div>
+
+                <div className="row" style={{ alignItems: 'center', justifyContent: 'flex-end', gap: '8px', paddingTop: '4px' }}>
+                  <button 
+                    className="btn btn-ghost btn-sm" 
+                    onClick={() => setEditingFlash(f)} 
+                    style={{ gap: '5px' }}
+                    title="Modifier ce flash"
+                  >
+                    <Edit3 size={14} /> Modifier
+                  </button>
+                  <button 
+                    className="btn btn-danger-ghost btn-sm" 
+                    onClick={() => onDeleteFlash(f.id)}
+                    style={{ gap: '5px' }}
+                    title="Supprimer ce flash"
+                  >
+                    <Trash2 size={14} /> Supprimer
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {/* Modal de modification de flash */}
+      {editingFlash && onUpdateFlash && (
+        <EditFlashModal
+          flash={editingFlash}
+          onClose={() => setEditingFlash(null)}
+          onSave={(updates) => {
+            onUpdateFlash(editingFlash.id, updates);
+            setEditingFlash(null);
+          }}
+        />
       )}
     </div>
   );

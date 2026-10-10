@@ -29,3 +29,4 @@ dist-ssr
 !.env.example
 *-firebase-adminsdk-*.json
 serviceAccount*.json
+.firebase
