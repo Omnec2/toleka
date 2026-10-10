@@ -226,13 +226,12 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
   // - Quand on swap à gauche : la prochaine vient d'en bas (+54px) et monte vers 0
   // - Quand on swap à droite : inversement, elle vient d'en haut (-54px) et descend vers 0
   const getUnderCardStyle = (): React.CSSProperties => {
-    const isRight = exitDirection === 'right' || (isDragging && dragX > 0);
-    const progress = Math.min(Math.abs(dragX) / 140, 1);
-    const scale = 0.94 + progress * 0.06;
-    const opacity = 0.55 + progress * 0.45;
-
-    const initialOffset = isRight ? -54 : 54;
-    const translateY = (1 - progress) * initialOffset;
+    // Seule la carte principale doit être visible au repos
+    if (!isDragging && !exitDirection) {
+      return {
+        display: 'none',
+      };
+    }
 
     if (exitDirection) {
       return {
@@ -243,10 +242,18 @@ export default function SwipeDeck({ flashs, profile, onApply, onAuthorClick, emp
       };
     }
 
+    const isRight = isDragging && dragX > 0;
+    const progress = Math.min(Math.abs(dragX) / 140, 1);
+    const scale = 0.96 + progress * 0.04;
+    const opacity = progress;
+
+    const initialOffset = isRight ? -30 : 30;
+    const translateY = (1 - progress) * initialOffset;
+
     return {
       transform: `scale(${scale}) translateY(${translateY}px)`,
       opacity,
-      transition: isDragging ? 'none' : 'transform 0.28s var(--ease), opacity 0.28s var(--ease)',
+      transition: 'none',
       pointerEvents: 'none',
     };
   };

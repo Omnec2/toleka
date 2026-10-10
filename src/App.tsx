@@ -500,12 +500,6 @@ export default function App() {
     <div className="shell">
       {toastEl}
 
-      <header className="topbar">
-        <Wordmark />
-        <button onClick={() => setTab('profile')} aria-label="Mon profil" className="top-avatar">
-          <Avatar name={profile.displayName} src={profile.photoURL} size={38} ring="var(--brand)" />
-        </button>
-      </header>
 
       {(demo || cloudError) && (
         <div className="banner">

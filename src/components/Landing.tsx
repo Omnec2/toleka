@@ -41,7 +41,6 @@ const DEMO_LIST = [...DEMO_CARDS, ...DEMO_CARDS];
 
 export default function Landing({ onLogin, loading }: Props) {
   const [activeCard, setActiveCard] = useState(0);
-  const [particlesVisible, setParticlesVisible] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -50,33 +49,30 @@ export default function Landing({ onLogin, loading }: Props) {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    setTimeout(() => setParticlesVisible(true), 400);
-  }, []);
-
   return (
-    <main className="landing" style={{ textAlign: 'center', alignItems: 'center', padding: '40px 20px 32px', gap: '28px' }}>
-
-      {/* Particles décoratives */}
-      {particlesVisible && (
-        <div className="landing-particles" aria-hidden="true">
-          {[...Array(8)].map((_, i) => (
-            <span key={i} className={`particle p${i + 1}`} />
-          ))}
-        </div>
-      )}
-
+    <main
+      className="landing"
+      style={{
+        textAlign: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100dvh',
+        padding: 'clamp(32px, 6vh, 52px) 20px',
+        gap: 'clamp(22px, 3.8vh, 34px)',
+        boxSizing: 'border-box',
+      }}
+    >
       {/* 1. Hero */}
-      <div className="landing-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%' }}>
+      <div className="landing-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', width: '100%' }}>
 
         {/* Logo de marque unifié */}
-        <BrandLogo size="clamp(3.2rem, 12vw, 5rem)" glow animated />
+        <BrandLogo size="clamp(3.2rem, 11vw, 4.6rem)" />
 
         {/* Headline */}
         <div style={{ maxWidth: '380px' }}>
           <h1 className="landing-headline">
             Trouve ton binôme créatif{' '}
-            <span className="grad-text shimmer-text">en un swipe</span>
+            <span className="grad-text">en un swipe</span>
           </h1>
           <p className="landing-sub">
             Vidéo, Musique, Acting, Model, Tech ou Design.<br />
